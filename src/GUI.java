@@ -314,9 +314,9 @@ public class GUI extends JFrame {
 		setVisible(false);
 		dispose();
 		client.sendMsg("gameend/" + id + "/" + rName + "/");
-		client.setRoom(new Room(id, rName, client));
+		/*client.setRoom(new Room(id, rName, client));
 		client.getRoom().setBounds(200, 200, 400, 300);
-		client.getRoom().setVisible(true);
+		client.getRoom().setVisible(true);*/
 	}
 
 	public void updateMap(int y, int x) throws Exception {

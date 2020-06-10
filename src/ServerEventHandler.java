@@ -54,11 +54,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "dgamestop":
-			m_server.BTeamOut(array[2], id);
+			m_server.DTeamOut(array[2], id);
 			m_server.addGuest(id);
-			m_server.broadcastTeam(array[2], "white", "stopgame/win");
-			m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
+			//m_server.broadcastTeam(array[2], "white", "stopgame/win");
+			//m_server.broadcastTeam(array[2], "watch", "stopgame/end");
+			//m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
 			break;
 
 		case "checkroomname":
@@ -83,8 +83,8 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "roomjoin":
-			m_server.removeGuest(id);
 			m_server.enterRoom(array[2], id);
+			
 			break;
 
 		case "roomout":
@@ -99,8 +99,6 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "tmsg":
-			//System.out.println("hi");
-
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			break;
 
@@ -130,6 +128,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 			m_server.removeGuest(id);
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
+			
+		case "ready":
+			m_server.ready(array[2], id);
+			
+			break;
 		}
 	}
 }
