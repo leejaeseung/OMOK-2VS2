@@ -124,6 +124,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 			m_server.removeGuest(id);
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
+			
+		case "ready":
+			m_server.ready(array[2], id);
+			
+			break;
 		}
 	}
 }

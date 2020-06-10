@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.List;
 import java.awt.Panel;
 import java.awt.TextArea;
@@ -15,7 +16,7 @@ public class Room extends Frame implements ActionListener {
 	List list;
 	TextField tf;
 	TextArea ta;
-	Button exitButton, blackButton, whiteButton, watchButton;
+	Button exitButton, blackButton, whiteButton, watchButton, readyButton;
 	Client client;
 	String rName;
 	String id;
@@ -36,23 +37,29 @@ public class Room extends Frame implements ActionListener {
 		blackButton = new Button("Black");
 		whiteButton = new Button("White");
 		watchButton = new Button("Watch");
+		readyButton = new Button("Ready");
 
-		Panel p1 = new Panel();
-		p1.setLayout(new BorderLayout());
-		Panel p2 = new Panel();
-		p2.setLayout(new BorderLayout());
-
-		p1.add(ta);
-		p1.add(list, "East");
-		p2.add(watchButton, "Center");
-		p2.add(exitButton, "South");
-		p2.add(blackButton, "West");
-		p2.add(whiteButton, "East");
-		p2.add(tf, "North");
+		Panel textPanel = new Panel();
+		textPanel.setLayout(new BorderLayout());
+		Panel BWDbuttons = new Panel();
+		BWDbuttons.setLayout(new GridLayout(1, 3));
+		Panel inputPanel = new Panel();
+		inputPanel.setLayout(new GridLayout(4, 1));
 		
+		BWDbuttons.add(blackButton);
+		BWDbuttons.add(watchButton);
+		BWDbuttons.add(whiteButton);
 
-		add(p1);
-		add(p2, "South");
+		textPanel.add(ta);
+		textPanel.add(list, "East");
+		
+		inputPanel.add(tf);
+		inputPanel.add(readyButton);
+		inputPanel.add(BWDbuttons);
+		inputPanel.add(exitButton);
+
+		add(textPanel);
+		add(inputPanel, "South");
 		tf.addActionListener(this);
 		exitButton.addActionListener(this);
 		blackButton.addActionListener(this);
@@ -86,6 +93,13 @@ public class Room extends Frame implements ActionListener {
 		}else if (e.getSource() == watchButton) {
 			try {
 				client.sendMsg("changeteam/" + id + "/" + rName + "//watch/");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
+		else if(e.getSource() == readyButton) {
+			try {
+				client.sendMsg("ready/" + id + "/" + rName);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}

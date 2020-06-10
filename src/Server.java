@@ -24,6 +24,11 @@ public class Server {
 	volatile HashMap<String, Integer> dNum;			//watch stone people count in each rooms
 	// <roomName, Integer>
 	
+	volatile HashMap<String, Integer> wReadyNum;	//white ready player count
+	volatile HashMap<String, Integer> bReadyNum;	//black ready player count
+	volatile HashMap<String, Boolean> wIsReady;
+	volatile HashMap<String, Boolean> bIsReady;
+	
 	volatile HashMap<String, Integer> tNum;	
 	// 오목판 두어진 돌에대한 정보 저장
 	volatile HashMap<String, ArrayList<Integer>> mlist;
@@ -33,11 +38,18 @@ public class Server {
 		map = new HashMap<String, ArrayList<String>>();
 		wMap = new HashMap<String, ArrayList<String>>();
 		bMap = new HashMap<String, ArrayList<String>>();
+		dMap = new HashMap<String, ArrayList<String>>();
+		
 		wNum = new HashMap<String, Integer>();
 		bNum = new HashMap<String, Integer>();
 		dNum = new HashMap<String, Integer>();
 		tNum = new HashMap<String, Integer>();
-		dMap = new HashMap<String, ArrayList<String>>();
+		
+		wReadyNum = new HashMap<String, Integer>();
+		bReadyNum = new HashMap<String, Integer>();
+		wIsReady = new HashMap<String, Boolean>();
+		bIsReady = new HashMap<String, Boolean>();
+		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
 		
@@ -304,6 +316,10 @@ public class Server {
 			//send reject enterRoom
 			//
 		}
+	}
+	
+	void ready(String rName, String g) {
+		
 	}
 
 	void removeRoomMember(String rName, String g) throws Exception {
