@@ -178,6 +178,10 @@ public class Server {
 		this.mlist = mlist;
 	}
 
+	public void resetTime(String rName) {
+		timeList.get(rName).resetTime();
+	}
+
 
 	void addGuest(String g) throws Exception {
 		list.add(g);
@@ -348,6 +352,8 @@ public class Server {
 	}
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
+		timeList.get(rName).finish();
+		timeList.remove(rName);
 		if (checkWaitingRoomName(rName)) {
 			removeBWDRoom(rName);
 			addRoom(rName, g);
@@ -460,6 +466,8 @@ public class Server {
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
 
+			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
+
 			initGameTime(rName);
 		}
 	}
@@ -470,24 +478,11 @@ public class Server {
 			this.sendGameTime(rName, time.getSec());
 			System.out.println("[SERVER] 현재시간 : " + time.getSec());
 		});
-		time.setTimeZeroListener(() -> {
-			this.sendGameTime(rName, time.getSec());
-		});
 		timeList.put(rName, time);
 	}
 
-	// TODO 메세지 형식 검토 후 아래 문자열 변경 필요
 	void sendGameTime(String rName, int curSec) {
-		try {
-			for(String g : wMap.get(rName))
-				sendMsg("timeflow/" + curSec, g);
-			for(String g : bMap.get(rName))
-				sendMsg("timeflow/" + curSec, g);
-			for(String g : dMap.get(rName))
-				sendMsg("timeflow/" + curSec, g);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		broadcastGameRoom(rName, "timeflow/" + curSec);
 	}
 
 	void broadcastRoom(String rName, String msg) throws Exception {
@@ -523,18 +518,18 @@ public class Server {
 		if (team.equals("black")) {
 			idx = 0;
 			for (String g : bMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else if (team.equals("white")) {
 			idx = 1;
 			for (String g : wMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else
 			for (String g : dMap.get(rName))
-				sendMsg("lock/" + Integer.toString(-100), g);
+				sendMsg("lock/" + -100, g);
 	}
 
 	void broadcast(String msg) throws Exception {
@@ -551,10 +546,10 @@ public class Server {
 		StringBuffer buffer = new StringBuffer("updatestack/");
 		ArrayList<Integer> l = mlist.get(rName);
 		int size = l.size();
-		buffer.append(Integer.toString(size) + "/");
+		buffer.append(size + "/");
 		System.out.println("size: " + size);
 		for (int i = 0; i < size; i++)
-			buffer.append(Integer.toString(l.get(i)) + ":");
+			buffer.append(l.get(i) + ":");
 
 		sendMsg(buffer.toString(), g);
 	}
@@ -564,6 +559,15 @@ public class Server {
 		CMDummyEvent cmde = new CMDummyEvent();
 		cmde.setDummyInfo(msg);
 		m_serverStub.send(cmde, id);
+	}
+
+	public void broadcastGameRoom(String rName, String msg) {
+		for (String g : bMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : wMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : dMap.get(rName))
+			sendMsg(msg, g);
 	}
 
 	public static void main(String args[]) throws Exception {

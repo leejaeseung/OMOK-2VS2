@@ -16,7 +16,6 @@ class MapSize {
 	public int getCell() {
 		return CELL;
 	}
-
 	public int getSize() {
 		return SIZE;
 	}
@@ -123,7 +122,8 @@ class Map {
 	}
 
 	public void sendXY(int y, int x) throws Exception {
-		client.sendMsg("xy//" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x));
+		client.sendMsg("xy//" + rName + "/" + y + "/" + x);
+		client.sendUpdateTurnMsg();
 	}
 }
 
@@ -217,15 +217,18 @@ class WindowHandler2 extends WindowAdapter {
 
 public class GUI extends JFrame {
 	private Container c;
-	MapSize size = new MapSize();
-	DrawBoard d;
 	private Map map;
+	private int time;
+	private JLabel timeLabel;
+	private JLabel whoseTurn;
+	private JPanel upperPanel;
 	TeamChat tchat;
 	String rName;
 	Client client;
 	String id;
-	private int time;
-	private JLabel timeLabel;
+	MapSize size = new MapSize();
+	DrawBoard d;
+
 
 	public GUI(String id, String title, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
@@ -236,13 +239,22 @@ public class GUI extends JFrame {
 		c = getContentPane();
 		setBounds(200, 20, 650, 700);
 
+		upperPanel = new JPanel();
+		upperPanel.setLayout(new BorderLayout());
+
 		time = 0;
 		timeLabel = new JLabel();
 		timeLabel.setHorizontalAlignment(JLabel.CENTER);
 		timeLabel.setText("00:" + String.format("%02d", time));
 
+		whoseTurn = new JLabel();
+		whoseTurn.setHorizontalAlignment(JLabel.CENTER);
+		whoseTurn.setText("unknown");
+
 		c.setLayout(new BorderLayout());
-		c.add(BorderLayout.NORTH, timeLabel);
+		c.add(BorderLayout.NORTH, upperPanel);
+		upperPanel.add(BorderLayout.WEST, whoseTurn);
+		upperPanel.add(BorderLayout.EAST, timeLabel);
 
 		map = new Map(size, client, rName, team);
 		d = new DrawBoard(size, map);
@@ -255,8 +267,17 @@ public class GUI extends JFrame {
 		this.addWindowListener(new WindowHandler2(this, tchat));
 	}
 
+	public void setCurTurnUserName(String userName) {
+		System.out.println("setting current turn user name");
+		this.whoseTurn.setText(userName);
+	}
+
 	public void sendStopGame(String msg) throws Exception {
 		client.sendMsg(msg + id + "/" + rName);
+	}
+
+	public Container getContainer() {
+		return c;
 	}
 
 	public void setTurn(int turn) {
@@ -271,14 +292,21 @@ public class GUI extends JFrame {
 		this.time = curTime;
 		if(this.time == -1) {
 			timeLabel.setText("TIME OUT!!");
+			d.setEnabled(false);
 			this.nextTurn();
+			this.map.changeCheck();
 		}
-		else
+		else {
+			if(!d.isEnabled()) d.setEnabled(true);
 			timeLabel.setText("00:" + String.format("%02d", time));
+		}
 	}
 
 	public void nextTurn() {
 		map.turncount = (map.turncount + 1) % 4;
+
+		if(map.turncount == map.turn)
+			client.sendUpdateTurnMsg();
 	}
 
 	public void showPopUp(String message) throws Exception {
@@ -294,11 +322,12 @@ public class GUI extends JFrame {
 	}
 
 	public void updateMap(int y, int x) throws Exception {
-		if (true == map.setMap(y, x)) {
-			setContentPane(d);
+		if (map.setMap(y, x)) {
+			c.revalidate();
+			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
-			if (res != "n")
+			if (res != "n") {
 				if (map.team.equals("watch"))
 					showPopUp("end");
 				else {
@@ -307,7 +336,8 @@ public class GUI extends JFrame {
 					else
 						showPopUp("lose");
 				}
-			map.turncount = (map.turncount + 1) % 4;
+			}
+			nextTurn();
 		}
 	}
 }
@@ -335,9 +365,10 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			if (false == map.setMap(y, x))
+			if (!map.setMap(y, x))
 				break;
-			gui.setContentPane(d);
+			gui.getContainer().revalidate();
+			gui.getContainer().repaint();
 			try {
 				map.sendXY(y, x);
 			} catch (Exception e1) {
@@ -347,22 +378,23 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
-			if (res != "n")
-				if (res == map.team)
+			if (res != "n") {
+				if (res == map.team) {
 					try {
 						gui.showPopUp("win");
 					} catch (Exception e2) {
 						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
-				else
+				} else {
 					try {
 						gui.showPopUp("lose");
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-
+				}
+			}
 			map.turncount = (map.turncount + 1) % 4;
 		}
 	}

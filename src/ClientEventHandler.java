@@ -135,6 +135,9 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "timeflow":
 			m_client.updateTime(array[1]);
 			break;
+
+		case "updateturn":
+			m_client.updateTurn(array[1]);
 		}
 	}
 
