@@ -8,12 +8,12 @@ public class Server {
 	
 	private CMServerStub m_serverStub;
 	private ServerEventHandler m_eventHandler;
-	// list of roomName
+	// 占쏙옙占쏙옙占실억옙占� 占싹댐옙 占쏙옙占싱몌옙
 	volatile ArrayList<String> roomNameList;
-	// state of eachRoom
+	//
 	volatile HashMap<String, Boolean> roomState;
 	volatile ArrayList<String> list;
-	
+	// 占쏙옙占썸에 占쌍댐옙 占쏙옙 占쏙옙占�
 	volatile HashMap<String, ArrayList<String>> map;	//all people names in each rooms
 	
 	volatile HashMap<String, ArrayList<String>> wMap;	//white stone people names in each rooms
@@ -27,10 +27,10 @@ public class Server {
 	
 	volatile HashMap<String, Integer> wReadyNum;	//white ready player count
 	volatile HashMap<String, Integer> bReadyNum;	//black ready player count
-	volatile HashMap<String, Integer> isReady;		//people is ready or in game 0 = non-ready, 1 = ready, 2 = in game
+	volatile HashMap<String, Boolean> isReady;		//people is ready
 	
 	volatile HashMap<String, Integer> tNum;	
-	// records of xy
+	// 占쏙옙占쏙옙占쏙옙 占싸억옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	Server() {
@@ -48,7 +48,7 @@ public class Server {
 		
 		wReadyNum = new HashMap<String, Integer>();
 		bReadyNum = new HashMap<String, Integer>();
-		isReady = new HashMap<String, Integer>();
+		isReady = new HashMap<String, Boolean>();
 		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
@@ -265,7 +265,7 @@ public class Server {
 		
 		wReadyNum.put(rName, 0);
 		bReadyNum.put(rName, 0);
-		isReady.put(g, 0);
+		isReady.put(g, false);
 		
 		dMap.get(rName).add(g);
 		System.out.println("占쏙옙占쏙옙占싫뱄옙 :" + rName);
@@ -280,27 +280,19 @@ public class Server {
 		for (String g : temp) {
 			buffer.append(g);
 			if (wMap.get(rName).contains(g)) {
-				if(isReady.get(g) == 1)
+				if(isReady.get(g))
 					buffer.append("(white) - Ready/");
-				else if(isReady.get(g) == 2)
-					buffer.append("(white) - In Game/");
 				else
 					buffer.append("(white)/");
 			}
 			else if (bMap.get(rName).contains(g)) {
-				if(isReady.get(g) == 1)
+				if(isReady.get(g))
 					buffer.append("(black) - Ready/");
-				else if(isReady.get(g) == 2)
-					buffer.append("(black) - In Game/");
 				else
 					buffer.append("(black)/");
 			}
-			else {
-				if(isReady.get(g) == 2)
-					buffer.append("(watch) - In Game/");
-				else if(isReady.get(g) == 0)
-					buffer.append("(watch)/");
-			}
+			else
+				buffer.append("(watch)/");
 		}
 		System.out.println(buffer.toString());
 		for (String g : temp)
@@ -329,7 +321,7 @@ public class Server {
 			tNum.replace(rName, ++otNum);
 			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
 			map.get(rName).add(g);
-			isReady.put(g, 0);
+			isReady.put(g, false);
 			dMap.get(rName).add(g);
 			dNum.replace(rName, dNum.get(rName) + 1);
 			
@@ -344,9 +336,10 @@ public class Server {
 			else {
 				// multicast success/enter
 				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
-				dMap.get(rName).add(g);
-				sendMsg("lock/" + Integer.toString(-100), g);
 				
+				//add YW's method
+				
+				sendMsg(buffer.toString(), g);
 			}
 			removeGuest(g);
 			updateRoomMember(rName);
@@ -360,7 +353,7 @@ public class Server {
 	
 	void ready(String rName, String g) throws Exception{
 		if(wMap.get(rName).contains(g)) {
-			if(isReady.get(g) == 1) {
+			if(isReady.get(g)) {
 				//if member g is already ready
 				wReadyNum.replace(rName, wReadyNum.get(rName) - 1);
 			}
@@ -370,7 +363,7 @@ public class Server {
 			}
 		}
 		else if(bMap.get(rName).contains(g)) {
-			if(isReady.get(g) == 1) {
+			if(isReady.get(g)) {
 				//if member g is already ready
 				bReadyNum.replace(rName, bReadyNum.get(rName) - 1);
 			}
@@ -381,14 +374,13 @@ public class Server {
 		}
 		else 
 			return;
-		isReady.replace(g, (isReady.get(g) + 1) % 2);
+		isReady.replace(g, !isReady.get(g));
 		updateRoomMember(rName);
-		gameStart(rName);
 	}
 
 	void removeRoomMember(String rName, String g) throws Exception {
 		map.get(rName).remove(g);
-		isReady.replace(g, 0);
+		isReady.replace(g, false);
 		if (wMap.get(rName).contains(g)) {
 			wMap.get(rName).remove(g);
 			wNum.replace(rName, wNum.get(rName) - 1);
@@ -402,7 +394,6 @@ public class Server {
 			dNum.replace(rName, dNum.get(rName) - 1);
 		}
 		tNum.replace(rName,  tNum.get(rName) - 1);
-		removeGuest(g);
 		updateRoomMember(rName);
 	}
 
@@ -438,17 +429,16 @@ public class Server {
 	}
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
-		roomState.replace(rName, false);
-		
-		isReady.replace(g, 0);
-		StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
-		sendMsg(buffer.toString(), g);
-		updateRoomMember(rName);
-		broadcastRoomlist();
+		if (checkWaitingRoomName(rName)) {
+			removeBWDRoom(rName);
+			addRoom(rName, g);
+		} else {
+			enterRoom(rName, g);
+		}
 	}
 
 	synchronized void changeTeam(String rName, String team, String g) throws Exception {
-		if(isReady.get(g) == 1)	return;
+		if(isReady.get(g))	return;
 		if (team.equals("white")) {
 			if (!wMap.get(rName).contains(g)) {
 				if (wNum.get(rName) < 2) {
@@ -494,28 +484,19 @@ public class Server {
 			}
 		}
 		updateRoomMember(rName);
-		
+		gameStart(rName);
 	}
 
 	void BTeamOut(String rName, String g) {
 		bMap.get(rName).remove(g);
-		bNum.replace(rName, 1);
-		map.get(rName).remove(g);
-		tNum.replace(rName, tNum.get(rName) - 1);
 	}
 
 	void WTeamOut(String rName, String g) {
 		wMap.get(rName).remove(g);
-		wNum.replace(rName, 1);
-		map.get(rName).remove(g);
-		tNum.replace(rName, tNum.get(rName) - 1);
 	}
 
 	void DTeamOut(String rName, String g) throws Exception {
 		dMap.get(rName).remove(g);
-		map.get(rName).remove(g);
-		dNum.replace(rName, dNum.get(rName) - 1);
-		tNum.replace(rName, tNum.get(rName) - 1);
 		sendTeamListD(rName);
 		//System.out.println(dMap.get(rName).size());
 	}
@@ -545,10 +526,8 @@ public class Server {
 	}
 
 	void gameStart(String rName) throws Exception {
-		if(wReadyNum.get(rName) == 2 && bReadyNum.get(rName) == 2) {
-		//if (wMap.get(rName).size() == 2 && bMap.get(rName).size() == 2) {
-			//map.get(rName).clear();
-			//tNum.replace(rName, 0);
+		if (wMap.get(rName).size() == 2 && bMap.get(rName).size() == 2) {
+			//map.remove(rName);
 			//broadcastRoomlist();
 			for (String g : bMap.get(rName))
 				sendMsg("gamestartB", g);
@@ -556,11 +535,7 @@ public class Server {
 				sendMsg("gamestartW", g);
 			for (String g : dMap.get(rName))
 				sendMsg("gamestartD", g);
-			for (String g : map.get(rName))
-				isReady.replace(g, 2);
 			roomState.replace(rName, true);
-			wReadyNum.replace(rName, 0);
-			bReadyNum.replace(rName, 0);
 			sendTeamListB(rName);
 			sendTeamListW(rName);
 			sendTeamListD(rName);
@@ -569,7 +544,6 @@ public class Server {
 			broadcastLock(rName, "watch");
 		}
 	}
-	
 
 	void broadcastRoom(String rName, String msg) throws Exception {
 		for (String g : map.get(rName))
