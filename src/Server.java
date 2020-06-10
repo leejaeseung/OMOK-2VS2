@@ -8,11 +8,12 @@ public class Server {
 	
 	private CMServerStub m_serverStub;
 	private ServerEventHandler m_eventHandler;
-	// ¿Ø¡ˆµ«æÓæﬂ «œ¥¬ πÊ¿Ã∏ß
+	
 	volatile ArrayList<String> roomNameList;
-	// ¥Î±‚πÊø° ¿÷¥¬ ªÁ∂˜∏Ì¥‹
+	
+	volatile HashMap<String, Boolean> roomState;
 	volatile ArrayList<String> list;
-	// ¥Î±‚πÊø° ¿÷¥¬ πÊ ∏Ì¥‹
+	
 	volatile HashMap<String, ArrayList<String>> map;	//all people names in each rooms
 	
 	volatile HashMap<String, ArrayList<String>> wMap;	//white stone people names in each rooms
@@ -24,22 +25,36 @@ public class Server {
 	volatile HashMap<String, Integer> dNum;			//watch stone people count in each rooms
 	// <roomName, Integer>
 	
+	volatile HashMap<String, Integer> wReadyNum;	//white ready player count
+	volatile HashMap<String, Integer> bReadyNum;	//black ready player count
+	volatile HashMap<String, Integer> isReady;		//people is ready or in game 0 = non-ready, 1 = ready, 2 = in game
+	
 	volatile HashMap<String, Integer> tNum;	
-	// ø¿∏Ò∆« µŒæÓ¡¯ µπø°¥Î«— ¡§∫∏ ¿˙¿Â
+	
 	volatile HashMap<String, ArrayList<Integer>> mlist;
+
+	private HashMap<String, Time> timeList;
 
 	Server() {
 		roomNameList = new ArrayList<String>();
+		roomState = new HashMap<String, Boolean>();
 		map = new HashMap<String, ArrayList<String>>();
 		wMap = new HashMap<String, ArrayList<String>>();
 		bMap = new HashMap<String, ArrayList<String>>();
+		dMap = new HashMap<String, ArrayList<String>>();
+		
 		wNum = new HashMap<String, Integer>();
 		bNum = new HashMap<String, Integer>();
 		dNum = new HashMap<String, Integer>();
 		tNum = new HashMap<String, Integer>();
-		dMap = new HashMap<String, ArrayList<String>>();
+		
+		wReadyNum = new HashMap<String, Integer>();
+		bReadyNum = new HashMap<String, Integer>();
+		isReady = new HashMap<String, Integer>();
+		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
+		timeList = new HashMap<String, Time>();
 		
 		m_serverStub = new CMServerStub();
 		m_eventHandler = new ServerEventHandler(m_serverStub, this);
@@ -49,13 +64,9 @@ public class Server {
 		return m_serverStub;
 	}
 
-
-
 	public void setM_serverStub(CMServerStub m_serverStub) {
 		this.m_serverStub = m_serverStub;
 	}
-
-
 
 	public ServerEventHandler getM_eventHandler() {
 		return m_eventHandler;
@@ -179,6 +190,10 @@ public class Server {
 		this.mlist = mlist;
 	}
 
+	public void resetTime(String rName) {
+		timeList.get(rName).resetTime();
+	}
+
 
 	void addGuest(String g) throws Exception {
 		list.add(g);
@@ -197,7 +212,7 @@ public class Server {
 		broadcastList();
 	}
 
-	// ∆Ø¡§ guestø°∞‘ listª—∏≤
+	
 	void getList(String g) throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g2 : list)
@@ -206,7 +221,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// ¥Î±‚πÊø° ¿÷¥¬guestµÈø°∞‘ ªı∑ŒøÓ listª—∏≤
+	
 	void broadcastList() throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g : list)
@@ -215,7 +230,7 @@ public class Server {
 		broadcast(buffer.toString());
 	}
 
-	// ∆Ø¡§ guestø°∞‘ roomlist ª—∏≤
+	
 	void getRoomlist(String g) throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -226,7 +241,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// ¥Î±‚πÊø° ¿÷¥¬ guestµÈø°∞‘ ªı∑ŒøÓ roomlistª—∏≤
+	
 	void broadcastRoomlist() throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -250,8 +265,13 @@ public class Server {
 		bNum.put(rName, 0);
 		dNum.put(rName, 1);
 		tNum.put(rName, 1);
+		
+		wReadyNum.put(rName, 0);
+		bReadyNum.put(rName, 0);
+		isReady.put(g, 0);
+		
 		dMap.get(rName).add(g);
-		System.out.println("∞≥º≥µ»πÊ :" + rName);
+		System.out.println("Âç†ÏèôÏòôÂç†ÏèôÏòôÂç†Ïã´Î±ÑÏòô :" + rName);
 		broadcastRoomlist();
 		updateRoomMember(rName);
 	}
@@ -262,12 +282,28 @@ public class Server {
 		System.out.println("size!!: " + temp.size());
 		for (String g : temp) {
 			buffer.append(g);
-			if (wMap.get(rName).contains(g))
-				buffer.append("(white)/");
-			else if (bMap.get(rName).contains(g))
-				buffer.append("(black)/");
-			else
-				buffer.append("(watch)/");
+			if (wMap.get(rName).contains(g)) {
+				if(isReady.get(g) == 1)
+					buffer.append("(white) - Ready/");
+				else if(isReady.get(g) == 2)
+					buffer.append("(white) - In Game/");
+				else
+					buffer.append("(white)/");
+			}
+			else if (bMap.get(rName).contains(g)) {
+				if(isReady.get(g) == 1)
+					buffer.append("(black) - Ready/");
+				else if(isReady.get(g) == 2)
+					buffer.append("(black) - In Game/");
+				else
+					buffer.append("(black)/");
+			}
+			else {
+				if(isReady.get(g) == 2)
+					buffer.append("(watch) - In Game/");
+				else if(isReady.get(g) == 0)
+					buffer.append("(watch)/");
+			}
 		}
 		System.out.println(buffer.toString());
 		for (String g : temp)
@@ -279,6 +315,7 @@ public class Server {
 			if (roomNameList.contains(rName))
 				return;
 			roomNameList.add(rName);
+			roomState.put(rName, false);
 			sendMsg("mkroom/" + rName, g);
 		}
 	}
@@ -290,35 +327,86 @@ public class Server {
 	}
 
 	void enterRoom(String rName, String g) throws Exception {
-		if(tNum.get(rName) < 7) {
+		if (tNum.get(rName) < 6) {
 			int otNum = tNum.get(rName);
 			tNum.replace(rName, ++otNum);
-			System.out.println("«ˆ¿Á πÊ ¿Œø¯ºˆ¥¬ : " + tNum.get(rName));
+			System.out.println("ÔøΩÏÅΩÔøΩÏò± Ë´õÔøΩ ÔøΩÏî§ÔøΩÏçùÔøΩÎãîÔøΩÎíó : " + tNum.get(rName));
 			map.get(rName).add(g);
+			isReady.put(g, 0);
 			dMap.get(rName).add(g);
 			dNum.replace(rName, dNum.get(rName) + 1);
+			
+			
+			//room is not start yet
+			if (roomState.get(rName) == false) {
+				// multicast success/enter
+				StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
+				sendMsg(buffer.toString(), g);
+			}
+			//room is already start
+			else {
+				// multicast success/enter
+				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
+				
+				//add YW's method
+				
+				sendMsg(buffer.toString(), g);
+			}
+			removeGuest(g);
 			updateRoomMember(rName);
 			broadcastRoomlist();
+		} else {
+			// send reject/enter
+			StringBuffer buffer = new StringBuffer("reject/enter");
+			sendMsg(buffer.toString(), g);
 		}
-		else {
-			//send reject enterRoom
-			//
+	}
+	
+	void ready(String rName, String g) throws Exception{
+		if(wMap.get(rName).contains(g)) {
+			if(isReady.get(g) == 1) {
+				//if member g is already ready
+				wReadyNum.replace(rName, wReadyNum.get(rName) - 1);
+			}
+			else {
+				//if member g was not ready
+				wReadyNum.replace(rName, wReadyNum.get(rName) + 1);
+			}
 		}
+		else if(bMap.get(rName).contains(g)) {
+			if(isReady.get(g) == 1) {
+				//if member g is already ready
+				bReadyNum.replace(rName, bReadyNum.get(rName) - 1);
+			}
+			else {
+				//if member g was not ready
+				bReadyNum.replace(rName, bReadyNum.get(rName) + 1);
+			}
+		}
+		else 
+			return;
+		isReady.replace(g, (isReady.get(g) + 1) % 2);
+		updateRoomMember(rName);
+		gameStart(rName);
 	}
 
 	void removeRoomMember(String rName, String g) throws Exception {
 		map.get(rName).remove(g);
+		isReady.replace(g, 0);
 		if (wMap.get(rName).contains(g)) {
 			wMap.get(rName).remove(g);
 			wNum.replace(rName, wNum.get(rName) - 1);
+			wReadyNum.replace(rName, wReadyNum.get(rName) - 1);
 		} else if (bMap.get(rName).contains(g)) {
 			bMap.get(rName).remove(g);
 			bNum.replace(rName, bNum.get(rName) - 1);
+			bReadyNum.replace(rName, bReadyNum.get(rName) - 1);
 		} else {
 			dMap.get(rName).remove(g);
 			dNum.replace(rName, dNum.get(rName) - 1);
 		}
 		tNum.replace(rName,  tNum.get(rName) - 1);
+		removeGuest(g);
 		updateRoomMember(rName);
 	}
 
@@ -331,9 +419,12 @@ public class Server {
 			bNum.remove(rName);
 			dNum.remove(rName);
 			tNum.remove(rName);
+			wReadyNum.remove(rName);
+			bReadyNum.remove(rName);
 			dMap.remove(rName);
 			mlist.remove(rName);
 			roomNameList.remove(rName);
+			roomState.remove(rName);
 		}
 	}
 
@@ -343,21 +434,37 @@ public class Server {
 		bMap.remove(rName);
 		bNum.remove(rName);
 		dNum.remove(rName);
+		wReadyNum.remove(rName);
+		bReadyNum.remove(rName);
 		tNum.remove(rName);
 		dMap.remove(rName);
 		mlist.remove(rName);
 	}
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
+
+		// ????? ?? ?????? gameend ???? ???? NullPointerException? ? ??. ??? ??? ?? ???? ??? ?? time thread? ???.
+		if(timeList.get(rName) != null) {
+			timeList.get(rName).finish();
+			timeList.remove(rName);
+		}
 		if (checkWaitingRoomName(rName)) {
 			removeBWDRoom(rName);
 			addRoom(rName, g);
 		} else {
 			enterRoom(rName, g);
 		}
+		roomState.replace(rName, false);
+		
+		isReady.replace(g, 0);
+		StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
+		sendMsg(buffer.toString(), g);
+		updateRoomMember(rName);
+		broadcastRoomlist();
 	}
 
 	synchronized void changeTeam(String rName, String team, String g) throws Exception {
+		if(isReady.get(g) == 1)	return;
 		if (team.equals("white")) {
 			if (!wMap.get(rName).contains(g)) {
 				if (wNum.get(rName) < 2) {
@@ -403,19 +510,28 @@ public class Server {
 			}
 		}
 		updateRoomMember(rName);
-		gameStart(rName);
+		
 	}
 
 	void BTeamOut(String rName, String g) {
 		bMap.get(rName).remove(g);
+		bNum.replace(rName, 1);
+		map.get(rName).remove(g);
+		tNum.replace(rName, tNum.get(rName) - 1);
 	}
 
 	void WTeamOut(String rName, String g) {
 		wMap.get(rName).remove(g);
+		wNum.replace(rName, 1);
+		map.get(rName).remove(g);
+		tNum.replace(rName, tNum.get(rName) - 1);
 	}
 
 	void DTeamOut(String rName, String g) throws Exception {
 		dMap.get(rName).remove(g);
+		map.get(rName).remove(g);
+		dNum.replace(rName, dNum.get(rName) - 1);
+		tNum.replace(rName, tNum.get(rName) - 1);
 		sendTeamListD(rName);
 		//System.out.println(dMap.get(rName).size());
 	}
@@ -445,22 +561,42 @@ public class Server {
 	}
 
 	void gameStart(String rName) throws Exception {
-		if (wMap.get(rName).size() == 2 && bMap.get(rName).size() == 2) {
-			map.remove(rName);
-			broadcastRoomlist();
+		if(wReadyNum.get(rName) == 2 && bReadyNum.get(rName) == 2) {
 			for (String g : bMap.get(rName))
 				sendMsg("gamestartB", g);
 			for (String g : wMap.get(rName))
 				sendMsg("gamestartW", g);
 			for (String g : dMap.get(rName))
 				sendMsg("gamestartD", g);
+			for (String g : map.get(rName))
+				isReady.replace(g, 2);
+			roomState.replace(rName, true);
+			wReadyNum.replace(rName, 0);
+			bReadyNum.replace(rName, 0);
 			sendTeamListB(rName);
 			sendTeamListW(rName);
 			sendTeamListD(rName);
 			broadcastLock(rName, "white");
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
+
+			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
+
+			initGameTime(rName);
 		}
+	}
+
+	void initGameTime(String rName) {
+		Time time = new Time(rName);
+		time.setTimeFlowListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+			System.out.println("[SERVER] «ˆ¿ÁΩ√∞£ : " + time.getSec());
+		});
+		timeList.put(rName, time);
+	}
+
+	void sendGameTime(String rName, int curSec) {
+		broadcastGameRoom(rName, "timeflow/" + curSec);
 	}
 
 	void broadcastRoom(String rName, String msg) throws Exception {
@@ -496,18 +632,18 @@ public class Server {
 		if (team.equals("black")) {
 			idx = 0;
 			for (String g : bMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else if (team.equals("white")) {
 			idx = 1;
 			for (String g : wMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else
 			for (String g : dMap.get(rName))
-				sendMsg("lock/" + Integer.toString(-100), g);
+				sendMsg("lock/" + -100, g);
 	}
 
 	void broadcast(String msg) throws Exception {
@@ -524,10 +660,10 @@ public class Server {
 		StringBuffer buffer = new StringBuffer("updatestack/");
 		ArrayList<Integer> l = mlist.get(rName);
 		int size = l.size();
-		buffer.append(Integer.toString(size) + "/");
+		buffer.append(size + "/");
 		System.out.println("size: " + size);
 		for (int i = 0; i < size; i++)
-			buffer.append(Integer.toString(l.get(i)) + ":");
+			buffer.append(l.get(i) + ":");
 
 		sendMsg(buffer.toString(), g);
 	}
@@ -537,6 +673,15 @@ public class Server {
 		CMDummyEvent cmde = new CMDummyEvent();
 		cmde.setDummyInfo(msg);
 		m_serverStub.send(cmde, id);
+	}
+
+	public void broadcastGameRoom(String rName, String msg) {
+		for (String g : bMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : wMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : dMap.get(rName))
+			sendMsg(msg, g);
 	}
 
 	public static void main(String args[]) throws Exception {

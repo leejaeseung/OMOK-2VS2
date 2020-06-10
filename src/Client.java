@@ -187,6 +187,14 @@ public class Client extends Frame implements ActionListener, MouseListener{
 		m_ClientStub.send(due, "SERVER");
 	}
 	
+	public void joinRoom(String rName) {
+		setVisible(false);
+		dispose();
+		room = new Room(id, rName, this);
+		room.setBounds(200, 200, 400, 300);
+		room.setVisible(true);
+	}
+	
 	public void mouseClicked(MouseEvent e) {
 		if (e.getClickCount() == 2)
 			try {
@@ -194,22 +202,31 @@ public class Client extends Frame implements ActionListener, MouseListener{
 					return;
 				String roomname[] = roomList.getSelectedItem().split("/");
 				System.out.println(roomname[0]);
-				setVisible(false);
-				dispose();
-				room = new Room(id, roomname[0], this);
-				room.setBounds(200, 200, 400, 300);
-				room.setVisible(true);
 
 				sendMsg("roomjoin/" + id + "/" + roomname[0]);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
 	}
+
+	public void updateTime(String time) {
+		this.gui.updateTime(Integer.parseInt(time));
+		System.out.println("[" + id + "] 현재시간 : " + time);
+	}
+
+	public void sendUpdateTurnMsg() {
+		sendMsg("updateturn/" + id + "/" + room.rName + "//");
+	}
+
+	public void updateTurn(String userName) {
+		this.gui.setCurTurnUserName(userName);
+	}
 	
 	public void mouseEntered(MouseEvent e) {
 	}
 
 	public void mouseExited(MouseEvent e) {
+
 	}
 
 	public void mousePressed(MouseEvent e) {

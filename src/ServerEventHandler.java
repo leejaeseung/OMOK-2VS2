@@ -34,14 +34,14 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 		
-		System.out.println(line + "¼ö½Å");
+		System.out.println(line + "ï¿½ï¿½ï¿½ï¿½");
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-		// ¾Æ¿¹ Ã³À½¿¡ ÀÔÀå
+		// ï¿½Æ¿ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		case "enter":
-			// ¼­¹ö list¿¡ guestÃß°¡
+			// ï¿½ï¿½ï¿½ï¿½ listï¿½ï¿½ guestï¿½ß°ï¿½
 			m_server.addGuest(id);
 			break;
 
@@ -54,11 +54,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "dgamestop":
-			m_server.BTeamOut(array[2], id);
+			m_server.DTeamOut(array[2], id);
 			m_server.addGuest(id);
-			m_server.broadcastTeam(array[2], "white", "stopgame/win");
-			m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
+			//m_server.broadcastTeam(array[2], "white", "stopgame/win");
+			//m_server.broadcastTeam(array[2], "watch", "stopgame/end");
+			//m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
 			break;
 
 		case "checkroomname":
@@ -83,8 +83,8 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "roomjoin":
-			m_server.removeGuest(id);
 			m_server.enterRoom(array[2], id);
+			
 			break;
 
 		case "roomout":
@@ -99,8 +99,6 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "tmsg":
-			//System.out.println("hi");
-
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			break;
 
@@ -120,10 +118,21 @@ public class ServerEventHandler implements CMAppEventHandler{
 			m_server.sendStack(id, array[2]);
 			break;
 
+		case "updateturn":
+			String msg = array[0] + "/" + array[1];
+			m_server.resetTime(array[2]);
+			m_server.broadcastGameRoom(array[2], msg);
+			break;
+
 		case "logout":
 			m_server.removeGuest(id);
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
+			
+		case "ready":
+			m_server.ready(array[2], id);
+			
+			break;
 		}
 	}
 }
