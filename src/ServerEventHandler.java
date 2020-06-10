@@ -99,8 +99,6 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "tmsg":
-			//System.out.println("hi");
-
 			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			break;
 
