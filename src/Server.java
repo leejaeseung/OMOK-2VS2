@@ -8,12 +8,12 @@ public class Server {
 	
 	private CMServerStub m_serverStub;
 	private ServerEventHandler m_eventHandler;
-	// 占쏙옙占쏙옙占실억옙占� 占싹댐옙 占쏙옙占싱몌옙
+	// list of roomName
 	volatile ArrayList<String> roomNameList;
-	//
+	// state of eachRoom
 	volatile HashMap<String, Boolean> roomState;
 	volatile ArrayList<String> list;
-	// 占쏙옙占썸에 占쌍댐옙 占쏙옙 占쏙옙占�
+	
 	volatile HashMap<String, ArrayList<String>> map;	//all people names in each rooms
 	
 	volatile HashMap<String, ArrayList<String>> wMap;	//white stone people names in each rooms
@@ -30,7 +30,7 @@ public class Server {
 	volatile HashMap<String, Integer> isReady;		//people is ready or in game 0 = non-ready, 1 = ready, 2 = in game
 	
 	volatile HashMap<String, Integer> tNum;	
-	// 占쏙옙占쏙옙占쏙옙 占싸억옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
+	// records of xy
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	Server() {
@@ -344,10 +344,9 @@ public class Server {
 			else {
 				// multicast success/enter
 				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
+				dMap.get(rName).add(g);
+				sendMsg("lock/" + Integer.toString(-100), g);
 				
-				//add YW's method
-				
-				sendMsg(buffer.toString(), g);
 			}
 			removeGuest(g);
 			updateRoomMember(rName);
@@ -570,6 +569,7 @@ public class Server {
 			broadcastLock(rName, "watch");
 		}
 	}
+	
 
 	void broadcastRoom(String rName, String msg) throws Exception {
 		for (String g : map.get(rName))

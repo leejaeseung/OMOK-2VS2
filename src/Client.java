@@ -111,7 +111,6 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	}
 
 	public void setGui(GUI gui) {
-		this.gui = gui;
 	}
 
 	public GUI2 getGui2() {
