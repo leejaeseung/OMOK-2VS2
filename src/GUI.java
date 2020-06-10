@@ -260,7 +260,6 @@ public class GUI extends JFrame {
 		d = new DrawBoard(size, map);
 
 		c.add(BorderLayout.CENTER, d);
-//		setContentPane(d);
 		addMouseListener(new mouseEventHandler(map, size, d, this));
 		setVisible(true);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -268,8 +267,7 @@ public class GUI extends JFrame {
 	}
 
 	public void setCurTurnUserName(String userName) {
-		System.out.println("setting current turn user name");
-		this.whoseTurn.setText(userName);
+		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
 	public void sendStopGame(String msg) throws Exception {
