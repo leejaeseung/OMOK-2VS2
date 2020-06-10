@@ -54,11 +54,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "dgamestop":
-			m_server.BTeamOut(array[2], id);
+			m_server.DTeamOut(array[2], id);
 			m_server.addGuest(id);
-			m_server.broadcastTeam(array[2], "white", "stopgame/win");
-			m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
+			//m_server.broadcastTeam(array[2], "white", "stopgame/win");
+			//m_server.broadcastTeam(array[2], "watch", "stopgame/end");
+			//m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
 			break;
 
 		case "checkroomname":

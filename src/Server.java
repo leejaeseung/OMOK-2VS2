@@ -8,12 +8,12 @@ public class Server {
 	
 	private CMServerStub m_serverStub;
 	private ServerEventHandler m_eventHandler;
-	// 占쏙옙占쏙옙占실억옙占� 占싹댐옙 占쏙옙占싱몌옙
+	
 	volatile ArrayList<String> roomNameList;
-	//
+	
 	volatile HashMap<String, Boolean> roomState;
 	volatile ArrayList<String> list;
-	// 占쏙옙占썸에 占쌍댐옙 占쏙옙 占쏙옙占�
+	
 	volatile HashMap<String, ArrayList<String>> map;	//all people names in each rooms
 	
 	volatile HashMap<String, ArrayList<String>> wMap;	//white stone people names in each rooms
@@ -30,7 +30,7 @@ public class Server {
 	volatile HashMap<String, Integer> isReady;		//people is ready or in game 0 = non-ready, 1 = ready, 2 = in game
 	
 	volatile HashMap<String, Integer> tNum;	
-	// 占쏙옙占쏙옙占쏙옙 占싸억옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
+	
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	Server() {
@@ -209,7 +209,7 @@ public class Server {
 		broadcastList();
 	}
 
-	// 특占쏙옙 guest占쏙옙占쏙옙 list占싼몌옙
+	
 	void getList(String g) throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g2 : list)
@@ -218,7 +218,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// 占쏙옙占썸에 占쌍댐옙guest占썽에占쏙옙 占쏙옙占싸울옙 list占싼몌옙
+	
 	void broadcastList() throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g : list)
@@ -227,7 +227,7 @@ public class Server {
 		broadcast(buffer.toString());
 	}
 
-	// 특占쏙옙 guest占쏙옙占쏙옙 roomlist 占싼몌옙
+	
 	void getRoomlist(String g) throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -238,7 +238,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// 占쏙옙占썸에 占쌍댐옙 guest占썽에占쏙옙 占쏙옙占싸울옙 roomlist占싼몌옙
+	
 	void broadcastRoomlist() throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -547,10 +547,6 @@ public class Server {
 
 	void gameStart(String rName) throws Exception {
 		if(wReadyNum.get(rName) == 2 && bReadyNum.get(rName) == 2) {
-		//if (wMap.get(rName).size() == 2 && bMap.get(rName).size() == 2) {
-			//map.get(rName).clear();
-			//tNum.replace(rName, 0);
-			//broadcastRoomlist();
 			for (String g : bMap.get(rName))
 				sendMsg("gamestartB", g);
 			for (String g : wMap.get(rName))
