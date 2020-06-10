@@ -205,6 +205,11 @@ public class Client extends Frame implements ActionListener, MouseListener{
 				e1.printStackTrace();
 			}
 	}
+
+	public void updateTime(String time) {
+		this.gui.updateTime(Integer.parseInt(time));
+		System.out.println("[" + id + "] 현재시간 : " + time);
+	}
 	
 	public void mouseEntered(MouseEvent e) {
 	}

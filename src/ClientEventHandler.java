@@ -131,6 +131,10 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "mkroom":
 			m_client.makeRoom(array[1]);
 			break;
+
+		case "timeflow":
+			m_client.updateTime(array[1]);
+			break;
 		}
 	}
 

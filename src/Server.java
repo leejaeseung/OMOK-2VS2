@@ -28,6 +28,8 @@ public class Server {
 	// 오목판 두어진 돌에대한 정보 저장
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
+	private HashMap<String, Time> timeList;
+
 	Server() {
 		roomNameList = new ArrayList<String>();
 		map = new HashMap<String, ArrayList<String>>();
@@ -40,6 +42,7 @@ public class Server {
 		dMap = new HashMap<String, ArrayList<String>>();
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
+		timeList = new HashMap<String, Time>();
 		
 		m_serverStub = new CMServerStub();
 		m_eventHandler = new ServerEventHandler(m_serverStub, this);
@@ -49,13 +52,9 @@ public class Server {
 		return m_serverStub;
 	}
 
-
-
 	public void setM_serverStub(CMServerStub m_serverStub) {
 		this.m_serverStub = m_serverStub;
 	}
-
-
 
 	public ServerEventHandler getM_eventHandler() {
 		return m_eventHandler;
@@ -460,6 +459,34 @@ public class Server {
 			broadcastLock(rName, "white");
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
+
+			initGameTime(rName);
+		}
+	}
+
+	void initGameTime(String rName) {
+		Time time = new Time(rName);
+		time.setTimeFlowListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+			System.out.println("[SERVER] 현재시간 : " + time.getSec());
+		});
+		time.setTimeZeroListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+		});
+		timeList.put(rName, time);
+	}
+
+	// TODO 메세지 형식 검토 후 아래 문자열 변경 필요
+	void sendGameTime(String rName, int curSec) {
+		try {
+			for(String g : wMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+			for(String g : bMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+			for(String g : dMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

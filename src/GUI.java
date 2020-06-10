@@ -1,7 +1,5 @@
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -9,9 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Stack;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 class MapSize {
 	private final int CELL = 30;
@@ -228,6 +224,8 @@ public class GUI extends JFrame {
 	String rName;
 	Client client;
 	String id;
+	private int time;
+	private JLabel timeLabel;
 
 	public GUI(String id, String title, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
@@ -237,10 +235,20 @@ public class GUI extends JFrame {
 		this.id = id;
 		c = getContentPane();
 		setBounds(200, 20, 650, 700);
-		c.setLayout(null);
+
+		time = 0;
+		timeLabel = new JLabel();
+		timeLabel.setHorizontalAlignment(JLabel.CENTER);
+		timeLabel.setText("00:" + String.format("%02d", time));
+
+		c.setLayout(new BorderLayout());
+		c.add(BorderLayout.NORTH, timeLabel);
+
 		map = new Map(size, client, rName, team);
 		d = new DrawBoard(size, map);
-		setContentPane(d);
+
+		c.add(BorderLayout.CENTER, d);
+//		setContentPane(d);
 		addMouseListener(new mouseEventHandler(map, size, d, this));
 		setVisible(true);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -257,6 +265,20 @@ public class GUI extends JFrame {
 
 	public Client waitingroom() {
 		return client;
+	}
+
+	public void updateTime(int curTime) {
+		this.time = curTime;
+		if(this.time == -1) {
+			timeLabel.setText("TIME OUT!!");
+			this.nextTurn();
+		}
+		else
+			timeLabel.setText("00:" + String.format("%02d", time));
+	}
+
+	public void nextTurn() {
+		map.turncount = (map.turncount + 1) % 4;
 	}
 
 	public void showPopUp(String message) throws Exception {
