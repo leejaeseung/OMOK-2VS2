@@ -442,8 +442,12 @@ public class Server {
 	}
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
-		timeList.get(rName).finish();
-		timeList.remove(rName);
+
+		// ????? ?? ?????? gameend ???? ???? NullPointerException? ? ??. ??? ??? ?? ???? ??? ?? time thread? ???.
+		if(timeList.get(rName) != null) {
+			timeList.get(rName).finish();
+			timeList.remove(rName);
+		}
 		if (checkWaitingRoomName(rName)) {
 			removeBWDRoom(rName);
 			addRoom(rName, g);
