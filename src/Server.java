@@ -27,8 +27,7 @@ public class Server {
 	
 	volatile HashMap<String, Integer> wReadyNum;	//white ready player count
 	volatile HashMap<String, Integer> bReadyNum;	//black ready player count
-	volatile HashMap<String, Boolean> wIsReady;
-	volatile HashMap<String, Boolean> bIsReady;
+	volatile HashMap<String, Boolean> isReady;		//people is ready
 	
 	volatile HashMap<String, Integer> tNum;	
 	// 占쏙옙占쏙옙占쏙옙 占싸억옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
@@ -49,8 +48,7 @@ public class Server {
 		
 		wReadyNum = new HashMap<String, Integer>();
 		bReadyNum = new HashMap<String, Integer>();
-		wIsReady = new HashMap<String, Boolean>();
-		bIsReady = new HashMap<String, Boolean>();
+		isReady = new HashMap<String, Boolean>();
 		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
@@ -264,6 +262,11 @@ public class Server {
 		bNum.put(rName, 0);
 		dNum.put(rName, 1);
 		tNum.put(rName, 1);
+		
+		wReadyNum.put(rName, 0);
+		bReadyNum.put(rName, 0);
+		isReady.put(g, false);
+		
 		dMap.get(rName).add(g);
 		System.out.println("占쏙옙占쏙옙占싫뱄옙 :" + rName);
 		broadcastRoomlist();
@@ -276,10 +279,18 @@ public class Server {
 		System.out.println("size!!: " + temp.size());
 		for (String g : temp) {
 			buffer.append(g);
-			if (wMap.get(rName).contains(g))
-				buffer.append("(white)/");
-			else if (bMap.get(rName).contains(g))
-				buffer.append("(black)/");
+			if (wMap.get(rName).contains(g)) {
+				if(isReady.get(g))
+					buffer.append("(white) - Ready/");
+				else
+					buffer.append("(white)/");
+			}
+			else if (bMap.get(rName).contains(g)) {
+				if(isReady.get(g))
+					buffer.append("(black) - Ready/");
+				else
+					buffer.append("(black)/");
+			}
 			else
 				buffer.append("(watch)/");
 		}
@@ -310,6 +321,7 @@ public class Server {
 			tNum.replace(rName, ++otNum);
 			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
 			map.get(rName).add(g);
+			isReady.put(g, false);
 			dMap.get(rName).add(g);
 			dNum.replace(rName, dNum.get(rName) + 1);
 			
@@ -339,18 +351,44 @@ public class Server {
 		}
 	}
 	
-	void ready(String rName, String g) {
-		
+	void ready(String rName, String g) throws Exception{
+		if(wMap.get(rName).contains(g)) {
+			if(isReady.get(g)) {
+				//if member g is already ready
+				wReadyNum.replace(rName, wReadyNum.get(rName) - 1);
+			}
+			else {
+				//if member g was not ready
+				wReadyNum.replace(rName, wReadyNum.get(rName) + 1);
+			}
+		}
+		else if(bMap.get(rName).contains(g)) {
+			if(isReady.get(g)) {
+				//if member g is already ready
+				bReadyNum.replace(rName, bReadyNum.get(rName) - 1);
+			}
+			else {
+				//if member g was not ready
+				bReadyNum.replace(rName, bReadyNum.get(rName) + 1);
+			}
+		}
+		else 
+			return;
+		isReady.replace(g, !isReady.get(g));
+		updateRoomMember(rName);
 	}
 
 	void removeRoomMember(String rName, String g) throws Exception {
 		map.get(rName).remove(g);
+		isReady.replace(g, false);
 		if (wMap.get(rName).contains(g)) {
 			wMap.get(rName).remove(g);
 			wNum.replace(rName, wNum.get(rName) - 1);
+			wReadyNum.replace(rName, wReadyNum.get(rName) - 1);
 		} else if (bMap.get(rName).contains(g)) {
 			bMap.get(rName).remove(g);
 			bNum.replace(rName, bNum.get(rName) - 1);
+			bReadyNum.replace(rName, bReadyNum.get(rName) - 1);
 		} else {
 			dMap.get(rName).remove(g);
 			dNum.replace(rName, dNum.get(rName) - 1);
@@ -368,6 +406,8 @@ public class Server {
 			bNum.remove(rName);
 			dNum.remove(rName);
 			tNum.remove(rName);
+			wReadyNum.remove(rName);
+			bReadyNum.remove(rName);
 			dMap.remove(rName);
 			mlist.remove(rName);
 			roomNameList.remove(rName);
@@ -381,6 +421,8 @@ public class Server {
 		bMap.remove(rName);
 		bNum.remove(rName);
 		dNum.remove(rName);
+		wReadyNum.remove(rName);
+		bReadyNum.remove(rName);
 		tNum.remove(rName);
 		dMap.remove(rName);
 		mlist.remove(rName);
@@ -396,6 +438,7 @@ public class Server {
 	}
 
 	synchronized void changeTeam(String rName, String team, String g) throws Exception {
+		if(isReady.get(g))	return;
 		if (team.equals("white")) {
 			if (!wMap.get(rName).contains(g)) {
 				if (wNum.get(rName) < 2) {
@@ -484,8 +527,8 @@ public class Server {
 
 	void gameStart(String rName) throws Exception {
 		if (wMap.get(rName).size() == 2 && bMap.get(rName).size() == 2) {
-			map.remove(rName);
-			broadcastRoomlist();
+			//map.remove(rName);
+			//broadcastRoomlist();
 			for (String g : bMap.get(rName))
 				sendMsg("gamestartB", g);
 			for (String g : wMap.get(rName))

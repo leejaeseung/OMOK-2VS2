@@ -40,7 +40,7 @@ public class Room extends Frame implements ActionListener {
 		readyButton = new Button("Ready");
 
 		Panel textPanel = new Panel();
-		textPanel.setLayout(new BorderLayout());
+		textPanel.setLayout(new GridLayout(1, 2));
 		Panel BWDbuttons = new Panel();
 		BWDbuttons.setLayout(new GridLayout(1, 3));
 		Panel inputPanel = new Panel();
@@ -61,6 +61,7 @@ public class Room extends Frame implements ActionListener {
 		add(textPanel);
 		add(inputPanel, "South");
 		tf.addActionListener(this);
+		readyButton.addActionListener(this);
 		exitButton.addActionListener(this);
 		blackButton.addActionListener(this);
 		whiteButton.addActionListener(this);
