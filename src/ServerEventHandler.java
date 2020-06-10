@@ -83,8 +83,8 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "roomjoin":
-			m_server.removeGuest(id);
 			m_server.enterRoom(array[2], id);
+			
 			break;
 
 		case "roomout":

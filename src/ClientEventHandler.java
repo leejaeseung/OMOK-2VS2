@@ -135,13 +135,14 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "success":
 			switch(array[1]) {
 			case "enter":
-				//들어가
+				
+				m_client.joinRoom(array[3]);
 			}
 			
 		case "reject":
 			switch(array[1]) {
 			case "enter":
-				//UI에 들어갈 수 없음을 표
+				
 			}
 		}
 	}

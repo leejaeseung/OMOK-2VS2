@@ -8,12 +8,12 @@ public class Server {
 	
 	private CMServerStub m_serverStub;
 	private ServerEventHandler m_eventHandler;
-	// �����Ǿ�� �ϴ� ���̸�
+	// 占쏙옙占쏙옙占실억옙占� 占싹댐옙 占쏙옙占싱몌옙
 	volatile ArrayList<String> roomNameList;
 	//
 	volatile HashMap<String, Boolean> roomState;
 	volatile ArrayList<String> list;
-	// ���濡 �ִ� �� ���
+	// 占쏙옙占썸에 占쌍댐옙 占쏙옙 占쏙옙占�
 	volatile HashMap<String, ArrayList<String>> map;	//all people names in each rooms
 	
 	volatile HashMap<String, ArrayList<String>> wMap;	//white stone people names in each rooms
@@ -31,7 +31,7 @@ public class Server {
 	volatile HashMap<String, Boolean> bIsReady;
 	
 	volatile HashMap<String, Integer> tNum;	
-	// ������ �ξ��� �������� ���� ����
+	// 占쏙옙占쏙옙占쏙옙 占싸억옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	Server() {
@@ -211,7 +211,7 @@ public class Server {
 		broadcastList();
 	}
 
-	// Ư�� guest���� list�Ѹ�
+	// 특占쏙옙 guest占쏙옙占쏙옙 list占싼몌옙
 	void getList(String g) throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g2 : list)
@@ -220,7 +220,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// ���濡 �ִ�guest�鿡�� ���ο� list�Ѹ�
+	// 占쏙옙占썸에 占쌍댐옙guest占썽에占쏙옙 占쏙옙占싸울옙 list占싼몌옙
 	void broadcastList() throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g : list)
@@ -229,7 +229,7 @@ public class Server {
 		broadcast(buffer.toString());
 	}
 
-	// Ư�� guest���� roomlist �Ѹ�
+	// 특占쏙옙 guest占쏙옙占쏙옙 roomlist 占싼몌옙
 	void getRoomlist(String g) throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -240,7 +240,7 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	// ���濡 �ִ� guest�鿡�� ���ο� roomlist�Ѹ�
+	// 占쏙옙占썸에 占쌍댐옙 guest占썽에占쏙옙 占쏙옙占싸울옙 roomlist占싼몌옙
 	void broadcastRoomlist() throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -265,7 +265,7 @@ public class Server {
 		dNum.put(rName, 1);
 		tNum.put(rName, 1);
 		dMap.get(rName).add(g);
-		System.out.println("�����ȹ� :" + rName);
+		System.out.println("占쏙옙占쏙옙占싫뱄옙 :" + rName);
 		broadcastRoomlist();
 		updateRoomMember(rName);
 	}
@@ -308,28 +308,30 @@ public class Server {
 		if (tNum.get(rName) < 6) {
 			int otNum = tNum.get(rName);
 			tNum.replace(rName, ++otNum);
-			System.out.println("현재 방 인원수는 : " + tNum.get(rName));
+			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
 			map.get(rName).add(g);
 			dMap.get(rName).add(g);
 			dNum.replace(rName, dNum.get(rName) + 1);
-			updateRoomMember(rName);
-			broadcastRoomlist();
+			
 			
 			//room is not start yet
 			if (roomState.get(rName) == false) {
 				// multicast success/enter
-				StringBuffer buffer = new StringBuffer("success/enter/waiting");
+				StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
 				sendMsg(buffer.toString(), g);
 			}
 			//room is already start
 			else {
 				// multicast success/enter
-				StringBuffer buffer = new StringBuffer("success/enter/running");
+				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
 				
 				//add YW's method
 				
 				sendMsg(buffer.toString(), g);
 			}
+			removeGuest(g);
+			updateRoomMember(rName);
+			broadcastRoomlist();
 		} else {
 			// send reject/enter
 			StringBuffer buffer = new StringBuffer("reject/enter");
