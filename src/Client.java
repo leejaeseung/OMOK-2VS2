@@ -21,6 +21,7 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	private CMClientStub m_ClientStub;
 	private ClientEventHandler m_CEventHandler;
 	
+	private int a;
 	private List roomList, userList, roomNumList;
 	private TextField tf;
 	private Button createButton;
