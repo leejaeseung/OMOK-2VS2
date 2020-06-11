@@ -139,24 +139,24 @@ class Map {
 		System.out.println("Map Color : " + map[y][x]);
 		
 		if(map[y][x] == GRAY || isEnd) {
-		if (checkBNW)
-			map[y][x] = BLACK;
-		else
-			map[y][x] = WHITE;
-		grayX = -1;
-		grayY = -1;
-		changeCheck();
+			if (checkBNW)
+				map[y][x] = BLACK;
+			else
+				map[y][x] = WHITE;
+			grayX = -1;
+			grayY = -1;
+			changeCheck();
 		}
 		return 1;
 	}
 
-	public void sendXY(int y, int x, int color) throws Exception {
+	public void sendXY(int y, int x, int color) {
 		if(color == 1) {
-			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/double");
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/double");
 			client.sendUpdateTurnMsg();
 		}
 		else if(color == 2)
-			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/single");
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/single");
 	}
 }
 
@@ -309,7 +309,7 @@ public class GUI extends JFrame {
 		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
-	public void sendStopGame(String msg) throws Exception {
+	public void sendStopGame(String msg) {
 		client.sendMsg(msg + id + "/" + rName);
 	}
 
@@ -380,6 +380,7 @@ public class GUI extends JFrame {
 				}
 			}
 			nextTurn();
+//			map.changeCheck();
 		}
 		else if(2 == mapColor) {
 			c.revalidate();
@@ -405,7 +406,7 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 	public void mouseClicked(MouseEvent e) {
 		if (map.turncount == map.turn) {
 			/*map.lock = false;
-		while (!map.lock) {*/
+			while (!map.lock) {*/
 			//map.lock = true;
 			int x = (int) Math.round((double) ((e.getX() - 26) / 30));
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
@@ -419,33 +420,29 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 				map.lock = false;*/
 			gui.getContainer().revalidate();
 			gui.getContainer().repaint();
-			try {
-				map.sendXY(y, x, mapColor);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			if(mapColor == 1) {
-			String res = map.cWin.checker(y, x, map.getXY(y, x));
-			System.out.println(map.team + " " + res);
-			if (res != "n") {
-				if (res == map.team) {
-					try {
-						gui.showPopUp("win");
-					} catch (Exception e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-				} else {
-					try {
-						gui.showPopUp("lose");
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+
+			map.sendXY(y, x, mapColor);
+
+			if (mapColor == 1) {
+				String res = map.cWin.checker(y, x, map.getXY(y, x));
+				System.out.println(map.team + " " + res);
+				if (res != "n") {
+					if (res == map.team) {
+						try {
+							gui.showPopUp("win");
+						} catch (Exception e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+					} else {
+						try {
+							gui.showPopUp("lose");
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				}
-			}
-			map.turncount = (map.turncount + 1) % 4;
 			}
 		}
 	}
