@@ -131,7 +131,14 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "mkroom":
 			m_client.makeRoom(array[1]);
 			break;
-			
+
+		case "timeflow":
+			m_client.updateTime(array[1]);
+			break;
+
+		case "updateturn":
+			m_client.updateTurn(array[1]);
+
 		case "success":
 			switch(array[1]) {
 			case "enter":
@@ -144,10 +151,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 			case "enter":
 				
 			}
-
-		case "timeflow":
-			m_client.updateTime(array[1]);
-			break;
 		}
 	}
 

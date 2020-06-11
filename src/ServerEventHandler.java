@@ -34,7 +34,7 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 		
-		System.out.println(line + "¼ö½Å");
+		System.out.println(line + "ï¿½ï¿½ï¿½ï¿½");
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
@@ -126,6 +126,12 @@ public class ServerEventHandler implements CMAppEventHandler{
 
 		case "stack":
 			m_server.sendStack(id, array[2]);
+			break;
+
+		case "updateturn":
+			String msg = array[0] + "/" + array[1];
+			m_server.resetTime(array[2]);
+			m_server.broadcastGameRoom(array[2], msg);
 			break;
 
 		case "logout":

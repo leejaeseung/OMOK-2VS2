@@ -16,7 +16,6 @@ class MapSize {
 	public int getCell() {
 		return CELL;
 	}
-
 	public int getSize() {
 		return SIZE;
 	}
@@ -117,6 +116,16 @@ class Map {
 		map[y][x] = 0;
 	}
 
+	public int getMap(int y, int x) {
+		if(map[y][x] == 0) {
+			return 2;
+		}
+		else if(map[y][x] == BLACK || map[y][x] == WHITE)
+		return 0;
+		else
+			return 1;
+	}
+	
 	public int setMap(int y, int x) {
 		if(map[y][x] == 0) {
 			if(grayX != -1 && grayY != -1) {
@@ -142,9 +151,11 @@ class Map {
 	}
 
 	public void sendXY(int y, int x, int color) throws Exception {
-		if(color == 1)
+		if(color == 1) {
 			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/double");
-		else if(color == GRAY)
+			client.sendUpdateTurnMsg();
+		}
+		else if(color == 2)
 			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/single");
 	}
 }
@@ -245,15 +256,18 @@ class WindowHandler2 extends WindowAdapter {
 
 public class GUI extends JFrame {
 	private Container c;
-	MapSize size = new MapSize();
-	DrawBoard d;
 	private Map map;
+	private int time;
+	private JLabel timeLabel;
+	private JLabel whoseTurn;
+	private JPanel upperPanel;
 	TeamChat tchat;
 	String rName;
 	Client client;
 	String id;
-	private int time;
-	private JLabel timeLabel;
+	MapSize size = new MapSize();
+	DrawBoard d;
+
 
 	public GUI(String id, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
@@ -264,27 +278,43 @@ public class GUI extends JFrame {
 		c = getContentPane();
 		setBounds(200, 20, 650, 700);
 
+		upperPanel = new JPanel();
+		upperPanel.setLayout(new BorderLayout());
+
 		time = 0;
 		timeLabel = new JLabel();
 		timeLabel.setHorizontalAlignment(JLabel.CENTER);
 		timeLabel.setText("00:" + String.format("%02d", time));
 
+		whoseTurn = new JLabel();
+		whoseTurn.setHorizontalAlignment(JLabel.CENTER);
+		whoseTurn.setText("unknown");
+
 		c.setLayout(new BorderLayout());
-		c.add(BorderLayout.NORTH, timeLabel);
+		c.add(BorderLayout.NORTH, upperPanel);
+		upperPanel.add(BorderLayout.WEST, whoseTurn);
+		upperPanel.add(BorderLayout.EAST, timeLabel);
 
 		map = new Map(size, client, rName, team);
 		d = new DrawBoard(size, map);
 
 		c.add(BorderLayout.CENTER, d);
-//		setContentPane(d);
 		addMouseListener(new mouseEventHandler(map, size, d, this));
 		setVisible(true);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.addWindowListener(new WindowHandler2(this, tchat));
 	}
 
+	public void setCurTurnUserName(String userName) {
+		this.whoseTurn.setText("NOW turn -> " + userName);
+	}
+
 	public void sendStopGame(String msg) throws Exception {
 		client.sendMsg(msg + id + "/" + rName);
+	}
+
+	public Container getContainer() {
+		return c;
 	}
 
 	public void setTurn(int turn) {
@@ -299,14 +329,21 @@ public class GUI extends JFrame {
 		this.time = curTime;
 		if(this.time == -1) {
 			timeLabel.setText("TIME OUT!!");
+			d.setEnabled(false);
 			this.nextTurn();
+			this.map.changeCheck();
 		}
-		else
+		else {
+			if(!d.isEnabled()) d.setEnabled(true);
 			timeLabel.setText("00:" + String.format("%02d", time));
+		}
 	}
 
 	public void nextTurn() {
 		map.turncount = (map.turncount + 1) % 4;
+
+		if(map.turncount == map.turn)
+			client.sendUpdateTurnMsg();
 	}
 
 	public void showPopUp(String message) throws Exception {
@@ -322,13 +359,18 @@ public class GUI extends JFrame {
 	}
 
 	public void updateMap(int y, int x) throws Exception {
+
 		System.out.println("¿ÀÀ×?");
 		int mapColor = map.setMap(y, x);
+
+		System.out.println("MapColor : " + mapColor);
 		if (1 == mapColor) {
 			setContentPane(d);
+			c.revalidate();
+			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
-			if (res != "n")
+			if (res != "n") {
 				if (map.team.equals("watch"))
 					showPopUp("end");
 				else {
@@ -337,10 +379,13 @@ public class GUI extends JFrame {
 					else
 						showPopUp("lose");
 				}
-			map.turncount = (map.turncount + 1) % 4;
+			}
+			nextTurn();
 		}
 		else if(2 == mapColor) {
 			setContentPane(d);
+			c.revalidate();
+			c.repaint();
 		}
 	}
 }
@@ -360,18 +405,22 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		if (map.turncount == map.turn)
-			map.lock = false;
-		while (!map.lock) {
-			map.lock = true;
+		if (map.turncount == map.turn) {
+			/*map.lock = false;
+		while (!map.lock) {*/
+			//map.lock = true;
 			int x = (int) Math.round((double) ((e.getX() - 26) / 30));
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			int mapColor = map.setMap(y, x);
+			int mapColor = map.getMap(y, x);
+			System.out.println("MapColor : " + mapColor);
 			if (0 == mapColor)
-				break;
-			gui.setContentPane(d);
+				return;
+			/*if(2 == mapColor)
+				map.lock = false;*/
+			gui.getContainer().revalidate();
+			gui.getContainer().repaint();
 			try {
 				map.sendXY(y, x, mapColor);
 			} catch (Exception e1) {
@@ -381,23 +430,25 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			if(mapColor == 1) {
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
-			if (res != "n")
-				if (res == map.team)
+			if (res != "n") {
+				if (res == map.team) {
 					try {
 						gui.showPopUp("win");
 					} catch (Exception e2) {
 						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}
-				else
+				} else {
 					try {
 						gui.showPopUp("lose");
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+				}
 			}
 			map.turncount = (map.turncount + 1) % 4;
+			}
 		}
 	}
 }

@@ -213,11 +213,20 @@ public class Client extends Frame implements ActionListener, MouseListener{
 		this.gui.updateTime(Integer.parseInt(time));
 		//System.out.println("[" + id + "] �쁽�옱�떆媛� : " + time);
 	}
+
+	public void sendUpdateTurnMsg() {
+		sendMsg("updateturn/" + id + "/" + room.rName + "//");
+	}
+
+	public void updateTurn(String userName) {
+		this.gui.setCurTurnUserName(userName);
+	}
 	
 	public void mouseEntered(MouseEvent e) {
 	}
 
 	public void mouseExited(MouseEvent e) {
+
 	}
 
 	public void mousePressed(MouseEvent e) {
