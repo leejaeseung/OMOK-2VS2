@@ -118,7 +118,7 @@ class Map {
 			return 2;
 		}
 		else if(map[y][x] == BLACK || map[y][x] == WHITE)
-		return 0;
+			return 0;
 		else
 			return 1;
 	}
@@ -365,7 +365,6 @@ public class GUI extends JFrame {
 
 		System.out.println("MapColor : " + mapColor);
 		if (1 == mapColor) {
-			setContentPane(d);
 			c.revalidate();
 			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
@@ -383,7 +382,6 @@ public class GUI extends JFrame {
 			nextTurn();
 		}
 		else if(2 == mapColor) {
-			setContentPane(d);
 			c.revalidate();
 			c.repaint();
 		}
