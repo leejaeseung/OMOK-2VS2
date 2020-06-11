@@ -448,12 +448,12 @@ public class Server {
 			timeList.get(rName).finish();
 			timeList.remove(rName);
 		}
-		if (checkWaitingRoomName(rName)) {
+		/*if (checkWaitingRoomName(rName)) {
 			removeBWDRoom(rName);
 			addRoom(rName, g);
 		} else {
 			enterRoom(rName, g);
-		}
+		}*/
 		roomState.replace(rName, false);
 		
 		isReady.replace(g, 0);
@@ -510,7 +510,6 @@ public class Server {
 			}
 		}
 		updateRoomMember(rName);
-		
 	}
 
 	void BTeamOut(String rName, String g) {
@@ -590,7 +589,7 @@ public class Server {
 		Time time = new Time(rName);
 		time.setTimeFlowListener(() -> {
 			this.sendGameTime(rName, time.getSec());
-			System.out.println("[SERVER] 현재시간 : " + time.getSec());
+			System.out.println("[SERVER] Timer: " + time.getSec());
 		});
 		timeList.put(rName, time);
 	}

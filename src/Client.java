@@ -201,7 +201,7 @@ public class Client extends Frame implements ActionListener, MouseListener{
 				if (roomList.getItemCount() == 0)
 					return;
 				String roomname[] = roomList.getSelectedItem().split("/");
-				System.out.println(roomname[0]);
+				//System.out.println(roomname[0]);
 
 				sendMsg("roomjoin/" + id + "/" + roomname[0]);
 			} catch (Exception e1) {
@@ -211,7 +211,7 @@ public class Client extends Frame implements ActionListener, MouseListener{
 
 	public void updateTime(String time) {
 		this.gui.updateTime(Integer.parseInt(time));
-		System.out.println("[" + id + "] 현재시간 : " + time);
+		//System.out.println("[" + id + "] �쁽�옱�떆媛� : " + time);
 	}
 
 	public void sendUpdateTurnMsg() {

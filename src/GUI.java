@@ -25,8 +25,11 @@ class Map {
 	private short[][] map;
 	private final short BLACK = 1;
 	private final short WHITE = -1;
-	// true °¡ black
+	private final short GRAY = 2;
+	// true is black
 	private boolean checkBNW = true;
+	private int grayX = -1;
+	private int grayY = -1;
 	Client client;
 	String rName;
 	String team;
@@ -67,8 +70,7 @@ class Map {
 		for (int i = 0; i < size; i++) {
 			int y = Integer.parseInt(array[2 * i]);
 			int x = Integer.parseInt(array[2 * i + 1]);
-			mStack.push(y);
-			mStack.push(x);
+			pushStack(y, x);
 			map[y][x] = flag;
 			flag *= -1;
 		}
@@ -90,6 +92,10 @@ class Map {
 	public short getWhite() {
 		return WHITE;
 	}
+	
+	public short getGray() {
+		return GRAY;
+	}
 
 	public short getXY(int y, int x) {
 		return map[y][x];
@@ -100,30 +106,57 @@ class Map {
 	}
 
 	public void changeCheck() {
-		if (checkBNW)
-			checkBNW = false;
-		else
-			checkBNW = true;
+		checkBNW = !checkBNW;
 	}
 
 	public void setNull(int y, int x) {
 		map[y][x] = 0;
 	}
 
-	public boolean setMap(int y, int x) {
-		if (map[y][x] != 0)
-			return false;
-		if (checkBNW)
-			map[y][x] = BLACK;
+	public int getMap(int y, int x) {
+		if(map[y][x] == 0) {
+			return 2;
+		}
+		else if(map[y][x] == BLACK || map[y][x] == WHITE)
+			return 0;
 		else
-			map[y][x] = WHITE;
-		changeCheck();
-		return true;
+			return 1;
+	}
+	
+	public int setMap(int y, int x, boolean isEnd) {
+		if(map[y][x] == 0 && !isEnd) {
+			if(grayX != -1 && grayY != -1) {
+				map[grayY][grayX] = 0;
+			}
+			grayX = x;
+			grayY = y;
+			map[y][x] = GRAY;
+			return 2;
+		}
+		if (map[y][x] == BLACK || map[y][x] == WHITE)
+			return 0;
+		
+		System.out.println("Map Color : " + map[y][x]);
+		
+		if(map[y][x] == GRAY || isEnd) {
+			if (checkBNW)
+				map[y][x] = BLACK;
+			else
+				map[y][x] = WHITE;
+			grayX = -1;
+			grayY = -1;
+			changeCheck();
+		}
+		return 1;
 	}
 
-	public void sendXY(int y, int x) throws Exception {
-		client.sendMsg("xy//" + rName + "/" + y + "/" + x);
-		client.sendUpdateTurnMsg();
+	public void sendXY(int y, int x, int color) {
+		if(color == 1) {
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/double");
+			client.sendUpdateTurnMsg();
+		}
+		else if(color == 2)
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/single");
 	}
 }
 
@@ -160,6 +193,8 @@ class DrawBoard extends JPanel {
 					drawBlack(arg0, x, y);
 				else if (map.getXY(y, x) == map.getWhite())
 					drawWhite(arg0, x, y);
+				else if(map.getXY(y, x) == map.getGray())
+					drawGray(arg0, x, y);
 	}
 
 	public void drawBlack(Graphics arg0, int x, int y) {
@@ -169,6 +204,10 @@ class DrawBoard extends JPanel {
 
 	public void drawWhite(Graphics arg0, int x, int y) {
 		arg0.setColor(Color.WHITE);
+		arg0.fillOval(x * size.getCell() + 15, y * size.getCell() + 15, STONE_SIZE, STONE_SIZE);
+	}
+	public void drawGray(Graphics arg0, int x, int y) {
+		arg0.setColor(Color.GRAY);
 		arg0.fillOval(x * size.getCell() + 15, y * size.getCell() + 15, STONE_SIZE, STONE_SIZE);
 	}
 }
@@ -230,7 +269,7 @@ public class GUI extends JFrame {
 	DrawBoard d;
 
 
-	public GUI(String id, String title, Client client, String rName, String team, TeamChat tchat) {
+	public GUI(String id, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
 		this.rName = rName;
 		this.tchat = tchat;
@@ -270,7 +309,7 @@ public class GUI extends JFrame {
 		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
-	public void sendStopGame(String msg) throws Exception {
+	public void sendStopGame(String msg) {
 		client.sendMsg(msg + id + "/" + rName);
 	}
 
@@ -319,8 +358,13 @@ public class GUI extends JFrame {
 		client.getRoom().setVisible(true);*/
 	}
 
-	public void updateMap(int y, int x) throws Exception {
-		if (map.setMap(y, x)) {
+	public void updateMap(int y, int x, boolean isEnd) throws Exception {
+
+		System.out.println("¿ÀÀ×?");
+		int mapColor = map.setMap(y, x, isEnd);
+
+		System.out.println("MapColor : " + mapColor);
+		if (1 == mapColor) {
 			c.revalidate();
 			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
@@ -336,6 +380,11 @@ public class GUI extends JFrame {
 				}
 			}
 			nextTurn();
+//			map.changeCheck();
+		}
+		else if(2 == mapColor) {
+			c.revalidate();
+			c.repaint();
 		}
 	}
 }
@@ -355,45 +404,46 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		if (map.turncount == map.turn)
-			map.lock = false;
-		while (!map.lock) {
-			map.lock = true;
+		if (map.turncount == map.turn) {
+			/*map.lock = false;
+			while (!map.lock) {*/
+			//map.lock = true;
 			int x = (int) Math.round((double) ((e.getX() - 26) / 30));
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			if (!map.setMap(y, x))
-				break;
+			int mapColor = map.getMap(y, x);
+			System.out.println("MapColor : " + mapColor);
+			if (0 == mapColor)
+				return;
+			/*if(2 == mapColor)
+				map.lock = false;*/
 			gui.getContainer().revalidate();
 			gui.getContainer().repaint();
-			try {
-				map.sendXY(y, x);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 
-			String res = map.cWin.checker(y, x, map.getXY(y, x));
-			System.out.println(map.team + " " + res);
-			if (res != "n") {
-				if (res == map.team) {
-					try {
-						gui.showPopUp("win");
-					} catch (Exception e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-				} else {
-					try {
-						gui.showPopUp("lose");
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+			map.sendXY(y, x, mapColor);
+
+			if (mapColor == 1) {
+				String res = map.cWin.checker(y, x, map.getXY(y, x));
+				System.out.println(map.team + " " + res);
+				if (res != "n") {
+					if (res == map.team) {
+						try {
+							gui.showPopUp("win");
+						} catch (Exception e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+					} else {
+						try {
+							gui.showPopUp("lose");
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				}
 			}
-			map.turncount = (map.turncount + 1) % 4;
 		}
 	}
 }
