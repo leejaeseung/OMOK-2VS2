@@ -120,7 +120,7 @@ public class ServerEventHandler implements CMAppEventHandler{
 
 		case "logout":
 			m_server.removeGuest(id);
-			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
+			//m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
 			
 		case "ready":

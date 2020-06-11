@@ -229,7 +229,7 @@ public class GUI extends JFrame {
 	Client client;
 	String id;
 
-	public GUI(String id, String title, Client client, String rName, String team, TeamChat tchat) {
+	public GUI(String id, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
 		this.rName = rName;
 		this.tchat = tchat;

@@ -74,7 +74,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			break;
 
 		case "roomout":
-			m_client.getRoom().list.remove(array[1]);
+			//m_client.getRoom().list.remove(array[1]);
 			break;
 
 		case "msg":
@@ -89,7 +89,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			m_client.getRoom().setVisible(false);
 			m_client.getRoom().dispose();
 			m_client.setTchat(new TeamChat(m_client.getId(), m_client.getRoom().rName, "black", m_client, m_client.getRoom()));
-			m_client.setGui(new GUI(m_client.getId(), "����", m_client, m_client.getRoom().rName, "black", m_client.getTchat()));
+			m_client.setGui(new GUI(m_client.getId(), m_client, m_client.getRoom().rName, "black", m_client.getTchat()));
 			m_client.getTchat().setBounds(200, 200, 400, 300);
 			m_client.getTchat().setVisible(true);
 			break;
@@ -98,7 +98,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			m_client.getRoom().setVisible(false);
 			m_client.getRoom().dispose();
 			m_client.setTchat(new TeamChat(m_client.getId(), m_client.getRoom().rName, "white", m_client, m_client.getRoom()));
-			m_client.setGui(new GUI(m_client.getId(), "����", m_client, m_client.getRoom().rName, "white", m_client.getTchat()));
+			m_client.setGui(new GUI(m_client.getId(), m_client, m_client.getRoom().rName, "white", m_client.getTchat()));
 			m_client.getTchat().setBounds(200, 200, 400, 300);
 			m_client.getTchat().setVisible(true);
 			break;
@@ -107,7 +107,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			m_client.getRoom().setVisible(false);
 			m_client.getRoom().dispose();
 			m_client.setTchat(new TeamChat2(m_client.getId(), m_client.getRoom().rName, "watch", m_client, m_client.getRoom()));
-			m_client.setGui(new GUI(m_client.getId(), "����", m_client, m_client.getRoom().rName, "watch", m_client.getTchat()));
+			m_client.setGui(new GUI(m_client.getId(), m_client, m_client.getRoom().rName, "watch", m_client.getTchat()));
 			m_client.getTchat().setBounds(200, 200, 400, 300);
 			m_client.getTchat().setVisible(true);
 			break;
