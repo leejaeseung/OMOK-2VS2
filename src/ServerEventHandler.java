@@ -34,14 +34,14 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 		
-		System.out.println(line + "¼ö½Å");
+		System.out.println(line + "ìˆ˜ì‹ ");
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-		// ¾Æ¿¹ Ã³À½¿¡ ÀÔÀå
+		// ì•„ì˜ˆ ì²˜ìŒì— ì…ì¥
 		case "enter":
-			// ¼­¹ö list¿¡ guestÃß°¡
+			// ì„œë²„ listì— guestì¶”ê°€
 			m_server.addGuest(id);
 			break;
 
