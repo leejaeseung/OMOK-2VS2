@@ -33,6 +33,8 @@ public class Server {
 	
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
+	private HashMap<String, Time> timeList;
+
 	Server() {
 		roomNameList = new ArrayList<String>();
 		roomState = new HashMap<String, Boolean>();
@@ -52,6 +54,7 @@ public class Server {
 		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
+		timeList = new HashMap<String, Time>();
 		
 		m_serverStub = new CMServerStub();
 		m_eventHandler = new ServerEventHandler(m_serverStub, this);
@@ -61,13 +64,9 @@ public class Server {
 		return m_serverStub;
 	}
 
-
-
 	public void setM_serverStub(CMServerStub m_serverStub) {
 		this.m_serverStub = m_serverStub;
 	}
-
-
 
 	public ServerEventHandler getM_eventHandler() {
 		return m_eventHandler;
@@ -495,7 +494,6 @@ public class Server {
 			}
 		}
 		updateRoomMember(rName);
-		
 	}
 
 	void BTeamOut(String rName, String g) {
@@ -564,6 +562,34 @@ public class Server {
 			broadcastLock(rName, "white");
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
+
+			initGameTime(rName);
+		}
+	}
+
+	void initGameTime(String rName) {
+		Time time = new Time(rName);
+		time.setTimeFlowListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+			System.out.println("[SERVER] Timer: " + time.getSec());
+		});
+		time.setTimeZeroListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+		});
+		timeList.put(rName, time);
+	}
+
+	// TODO �޼��� ���� ���� �� �Ʒ� ���ڿ� ���� �ʿ�
+	void sendGameTime(String rName, int curSec) {
+		try {
+			for(String g : wMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+			for(String g : bMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+			for(String g : dMap.get(rName))
+				sendMsg("timeflow/" + curSec, g);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

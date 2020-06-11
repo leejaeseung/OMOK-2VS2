@@ -39,9 +39,9 @@ public class ServerEventHandler implements CMAppEventHandler{
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-		// 아예 처음에 입장
+		// first enter
 		case "enter":
-			// 서버 list에 guest추가
+			// add waiting list
 			m_server.addGuest(id);
 			break;
 
@@ -107,11 +107,21 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "xy":
-			System.out.println(1 + ":" + array[3] + " " + array[4] + " " + array[2]);
-			m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4]);
-			m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4]);
-			m_server.broadcastTeam(array[2], "watch", "xy/" + array[3] + "/" + array[4]);
-			m_server.push(array[2], array[3], array[4]);
+			if(array[5].equals("double")) {
+				System.out.println(1 + ":" + array[3] + " " + array[4] + " " + array[2]);
+				m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4]);
+				m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4]);
+				m_server.broadcastTeam(array[2], "watch", "xy/" + array[3] + "/" + array[4]);
+				m_server.push(array[2], array[3], array[4]);
+			}
+			else {
+				if(array[1].equals("black")) {
+					m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4]);
+				}
+				else if(array[1].equals("white")) {
+					m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4]);
+				}
+			}
 			break;
 
 		case "stack":

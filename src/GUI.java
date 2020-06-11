@@ -1,7 +1,5 @@
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -9,9 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Stack;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 class MapSize {
 	private final int CELL = 30;
@@ -30,8 +26,11 @@ class Map {
 	private short[][] map;
 	private final short BLACK = 1;
 	private final short WHITE = -1;
-	// true °¡ black
+	private final short GRAY = 2;
+	// true is black
 	private boolean checkBNW = true;
+	private int grayX = -1;
+	private int grayY = -1;
 	Client client;
 	String rName;
 	String team;
@@ -72,8 +71,7 @@ class Map {
 		for (int i = 0; i < size; i++) {
 			int y = Integer.parseInt(array[2 * i]);
 			int x = Integer.parseInt(array[2 * i + 1]);
-			mStack.push(y);
-			mStack.push(x);
+			pushStack(y, x);
 			map[y][x] = flag;
 			flag *= -1;
 		}
@@ -95,6 +93,10 @@ class Map {
 	public short getWhite() {
 		return WHITE;
 	}
+	
+	public short getGray() {
+		return GRAY;
+	}
 
 	public short getXY(int y, int x) {
 		return map[y][x];
@@ -115,19 +117,35 @@ class Map {
 		map[y][x] = 0;
 	}
 
-	public boolean setMap(int y, int x) {
-		if (map[y][x] != 0)
-			return false;
+	public int setMap(int y, int x) {
+		if(map[y][x] == 0) {
+			if(grayX != -1 && grayY != -1) {
+				map[grayY][grayX] = 0;
+			}
+			grayX = x;
+			grayY = y;
+			map[y][x] = GRAY;
+			return 2;
+		}
+		if (map[y][x] == BLACK || map[y][x] == WHITE)
+			return 0;
+		if(map[y][x] == GRAY) {
 		if (checkBNW)
 			map[y][x] = BLACK;
 		else
 			map[y][x] = WHITE;
+		grayX = -1;
+		grayY = -1;
 		changeCheck();
-		return true;
+		}
+		return 1;
 	}
 
-	public void sendXY(int y, int x) throws Exception {
-		client.sendMsg("xy//" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x));
+	public void sendXY(int y, int x, int color) throws Exception {
+		if(color == 1)
+			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/double");
+		else if(color == GRAY)
+			client.sendMsg("xy/" + team + "/" + rName + "/" + Integer.toString(y) + "/" + Integer.toString(x) + "/single");
 	}
 }
 
@@ -164,6 +182,8 @@ class DrawBoard extends JPanel {
 					drawBlack(arg0, x, y);
 				else if (map.getXY(y, x) == map.getWhite())
 					drawWhite(arg0, x, y);
+				else if(map.getXY(y, x) == map.getGray())
+					drawGray(arg0, x, y);
 	}
 
 	public void drawBlack(Graphics arg0, int x, int y) {
@@ -173,6 +193,10 @@ class DrawBoard extends JPanel {
 
 	public void drawWhite(Graphics arg0, int x, int y) {
 		arg0.setColor(Color.WHITE);
+		arg0.fillOval(x * size.getCell() + 15, y * size.getCell() + 15, STONE_SIZE, STONE_SIZE);
+	}
+	public void drawGray(Graphics arg0, int x, int y) {
+		arg0.setColor(Color.GRAY);
 		arg0.fillOval(x * size.getCell() + 15, y * size.getCell() + 15, STONE_SIZE, STONE_SIZE);
 	}
 }
@@ -228,6 +252,8 @@ public class GUI extends JFrame {
 	String rName;
 	Client client;
 	String id;
+	private int time;
+	private JLabel timeLabel;
 
 	public GUI(String id, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
@@ -237,10 +263,20 @@ public class GUI extends JFrame {
 		this.id = id;
 		c = getContentPane();
 		setBounds(200, 20, 650, 700);
-		c.setLayout(null);
+
+		time = 0;
+		timeLabel = new JLabel();
+		timeLabel.setHorizontalAlignment(JLabel.CENTER);
+		timeLabel.setText("00:" + String.format("%02d", time));
+
+		c.setLayout(new BorderLayout());
+		c.add(BorderLayout.NORTH, timeLabel);
+
 		map = new Map(size, client, rName, team);
 		d = new DrawBoard(size, map);
-		setContentPane(d);
+
+		c.add(BorderLayout.CENTER, d);
+//		setContentPane(d);
 		addMouseListener(new mouseEventHandler(map, size, d, this));
 		setVisible(true);
 //		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -259,6 +295,20 @@ public class GUI extends JFrame {
 		return client;
 	}
 
+	public void updateTime(int curTime) {
+		this.time = curTime;
+		if(this.time == -1) {
+			timeLabel.setText("TIME OUT!!");
+			this.nextTurn();
+		}
+		else
+			timeLabel.setText("00:" + String.format("%02d", time));
+	}
+
+	public void nextTurn() {
+		map.turncount = (map.turncount + 1) % 4;
+	}
+
 	public void showPopUp(String message) throws Exception {
 		JOptionPane.showMessageDialog(this, message, "", JOptionPane.INFORMATION_MESSAGE);
 		tchat.setVisible(false);
@@ -272,7 +322,9 @@ public class GUI extends JFrame {
 	}
 
 	public void updateMap(int y, int x) throws Exception {
-		if (true == map.setMap(y, x)) {
+		System.out.println("¿ÀÀ×?");
+		int mapColor = map.setMap(y, x);
+		if (1 == mapColor) {
 			setContentPane(d);
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
@@ -286,6 +338,9 @@ public class GUI extends JFrame {
 						showPopUp("lose");
 				}
 			map.turncount = (map.turncount + 1) % 4;
+		}
+		else if(2 == mapColor) {
+			setContentPane(d);
 		}
 	}
 }
@@ -313,16 +368,17 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			if (false == map.setMap(y, x))
+			int mapColor = map.setMap(y, x);
+			if (0 == mapColor)
 				break;
 			gui.setContentPane(d);
 			try {
-				map.sendXY(y, x);
+				map.sendXY(y, x, mapColor);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
+			if(mapColor == 1) {
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
 			if (res != "n")
@@ -340,7 +396,7 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-
+			}
 			map.turncount = (map.turncount + 1) % 4;
 		}
 	}

@@ -73,9 +73,9 @@ public class ClientEventHandler implements CMAppEventHandler {
 			}
 			break;
 
-		case "roomout":
+		/*case "roomout":
 			//m_client.getRoom().list.remove(array[1]);
-			break;
+			break;*/
 
 		case "msg":
 			m_client.getRoom().ta.append("[" + array[1] + "]" + array[2] + "\n");
@@ -144,6 +144,10 @@ public class ClientEventHandler implements CMAppEventHandler {
 			case "enter":
 				
 			}
+
+		case "timeflow":
+			m_client.updateTime(array[1]);
+			break;
 		}
 	}
 
