@@ -106,10 +106,7 @@ class Map {
 	}
 
 	public void changeCheck() {
-		if (checkBNW)
-			checkBNW = false;
-		else
-			checkBNW = true;
+		checkBNW = !checkBNW;
 	}
 
 	public void setNull(int y, int x) {
@@ -126,8 +123,8 @@ class Map {
 			return 1;
 	}
 	
-	public int setMap(int y, int x) {
-		if(map[y][x] == 0) {
+	public int setMap(int y, int x, boolean isEnd) {
+		if(map[y][x] == 0 && !isEnd) {
 			if(grayX != -1 && grayY != -1) {
 				map[grayY][grayX] = 0;
 			}
@@ -138,7 +135,10 @@ class Map {
 		}
 		if (map[y][x] == BLACK || map[y][x] == WHITE)
 			return 0;
-		if(map[y][x] == GRAY) {
+		
+		System.out.println("Map Color : " + map[y][x]);
+		
+		if(map[y][x] == GRAY || isEnd) {
 		if (checkBNW)
 			map[y][x] = BLACK;
 		else
@@ -358,10 +358,10 @@ public class GUI extends JFrame {
 		client.getRoom().setVisible(true);*/
 	}
 
-	public void updateMap(int y, int x) throws Exception {
+	public void updateMap(int y, int x, boolean isEnd) throws Exception {
 
 		System.out.println("¿ÀÀ×?");
-		int mapColor = map.setMap(y, x);
+		int mapColor = map.setMap(y, x, isEnd);
 
 		System.out.println("MapColor : " + mapColor);
 		if (1 == mapColor) {

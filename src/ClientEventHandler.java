@@ -113,7 +113,12 @@ public class ClientEventHandler implements CMAppEventHandler {
 			break;
 
 		case "xy":
-			m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]));
+			if(array[3].equals("end")) {
+				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]), true);	
+			}
+			else if(array[3].equals("continue")) {
+				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]), false);	
+			}
 			break;
 
 		case "lock":
@@ -121,7 +126,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			break;
 
 		case "updatestack":
-			m_client.getGui2().updateStack(Integer.parseInt(array[1]), array[2]);
+				m_client.getGui2().updateStack(Integer.parseInt(array[1]), array[2]);
 			break;
 
 		case "stopgame":
