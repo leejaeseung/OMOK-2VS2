@@ -147,7 +147,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "success":
 			switch(array[1]) {
 			case "enter":
-				
 				m_client.joinRoom(array[3]);
 			}
 			
