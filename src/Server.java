@@ -33,6 +33,8 @@ public class Server {
 	
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
+	private HashMap<String, Time> timeList;
+
 	Server() {
 		roomNameList = new ArrayList<String>();
 		roomState = new HashMap<String, Boolean>();
@@ -52,6 +54,7 @@ public class Server {
 		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
+		timeList = new HashMap<String, Time>();
 		
 		m_serverStub = new CMServerStub();
 		m_eventHandler = new ServerEventHandler(m_serverStub, this);
@@ -61,13 +64,9 @@ public class Server {
 		return m_serverStub;
 	}
 
-
-
 	public void setM_serverStub(CMServerStub m_serverStub) {
 		this.m_serverStub = m_serverStub;
 	}
-
-
 
 	public ServerEventHandler getM_eventHandler() {
 		return m_eventHandler;
@@ -189,6 +188,10 @@ public class Server {
 
 	public void setMlist(HashMap<String, ArrayList<Integer>> mlist) {
 		this.mlist = mlist;
+	}
+
+	public void resetTime(String rName) {
+		timeList.get(rName).resetTime();
 	}
 
 
@@ -345,9 +348,10 @@ public class Server {
 				// multicast success/enter
 				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
 				
+				sendMsg(buffer.toString(), g);
+				obsStart(rName, g);
 				//add YW's method
 				
-				sendMsg(buffer.toString(), g);
 			}
 			removeGuest(g);
 			updateRoomMember(rName);
@@ -357,7 +361,7 @@ public class Server {
 			StringBuffer buffer = new StringBuffer("reject/enter");
 			sendMsg(buffer.toString(), g);
 		}
-	}
+	}//
 	
 	void ready(String rName, String g) throws Exception{
 		if(wMap.get(rName).contains(g)) {
@@ -439,6 +443,18 @@ public class Server {
 	}
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
+
+		// ????? ?? ?????? gameend ???? ???? NullPointerException? ? ??. ??? ??? ?? ???? ??? ?? time thread? ???.
+		if(timeList.get(rName) != null) {
+			timeList.get(rName).finish();
+			timeList.remove(rName);
+		}
+		/*if (checkWaitingRoomName(rName)) {
+			removeBWDRoom(rName);
+			addRoom(rName, g);
+		} else {
+			enterRoom(rName, g);
+		}*/
 		roomState.replace(rName, false);
 		
 		isReady.replace(g, 0);
@@ -495,7 +511,6 @@ public class Server {
 			}
 		}
 		updateRoomMember(rName);
-		
 	}
 
 	void BTeamOut(String rName, String g) {
@@ -564,7 +579,40 @@ public class Server {
 			broadcastLock(rName, "white");
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
+
+			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
+
+			initGameTime(rName);
 		}
+	}
+	
+	void obsStart(String rName, String g) throws Exception {
+		sendMsg("gamestartD", g);
+		sendTeamListD(rName);
+		broadcastLock(rName, "watch");
+		
+		//좌표들보내기
+		int loop = mlist.get(rName).size();
+		System.out.println("loop : " + loop);
+		for(int i=0; i<loop; i+=2) {
+			String y = mlist.get(rName).get(i).toString();
+			String x = mlist.get(rName).get(i+1).toString();
+			String msg = "xy/" + y + "/" + x + "/end";
+			sendMsg(msg, g);
+		}
+	}
+
+	void initGameTime(String rName) {
+		Time time = new Time(rName);
+		time.setTimeFlowListener(() -> {
+			this.sendGameTime(rName, time.getSec());
+			System.out.println("[SERVER] Timer: " + time.getSec());
+		});
+		timeList.put(rName, time);
+	}
+
+	void sendGameTime(String rName, int curSec) {
+		broadcastGameRoom(rName, "timeflow/" + curSec);
 	}
 
 	void broadcastRoom(String rName, String msg) throws Exception {
@@ -600,18 +648,18 @@ public class Server {
 		if (team.equals("black")) {
 			idx = 0;
 			for (String g : bMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else if (team.equals("white")) {
 			idx = 1;
 			for (String g : wMap.get(rName)) {
-				sendMsg("lock/" + Integer.toString(idx), g);
+				sendMsg("lock/" + idx, g);
 				idx += 2;
 			}
 		} else
 			for (String g : dMap.get(rName))
-				sendMsg("lock/" + Integer.toString(-100), g);
+				sendMsg("lock/" + -100, g);
 	}
 
 	void broadcast(String msg) throws Exception {
@@ -628,10 +676,10 @@ public class Server {
 		StringBuffer buffer = new StringBuffer("updatestack/");
 		ArrayList<Integer> l = mlist.get(rName);
 		int size = l.size();
-		buffer.append(Integer.toString(size) + "/");
+		buffer.append(size + "/");
 		System.out.println("size: " + size);
 		for (int i = 0; i < size; i++)
-			buffer.append(Integer.toString(l.get(i)) + ":");
+			buffer.append(l.get(i) + ":");
 
 		sendMsg(buffer.toString(), g);
 	}
@@ -641,6 +689,15 @@ public class Server {
 		CMDummyEvent cmde = new CMDummyEvent();
 		cmde.setDummyInfo(msg);
 		m_serverStub.send(cmde, id);
+	}
+
+	public void broadcastGameRoom(String rName, String msg) {
+		for (String g : bMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : wMap.get(rName))
+			sendMsg(msg, g);
+		for (String g : dMap.get(rName))
+			sendMsg(msg, g);
 	}
 
 	public static void main(String args[]) throws Exception {
