@@ -33,25 +33,15 @@ public class ServerEventHandler implements CMAppEventHandler{
 	private void processDummyEvent(CMEvent cme) throws Exception {
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
-		
-<<<<<<< HEAD
+
 		System.out.println(line + "수신");
-=======
-		System.out.println(line + "����");
->>>>>>> af42f31577c9d416cdb48ed6ed10655775a445d5
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-<<<<<<< HEAD
 		// 아예 처음에 입장
 		case "enter":
 			// 서버 list에 guest추가
-=======
-		// first enter
-		case "enter":
-			// add waiting list
->>>>>>> af42f31577c9d416cdb48ed6ed10655775a445d5
 			m_server.addGuest(id);
 			break;
 
@@ -151,7 +141,6 @@ public class ServerEventHandler implements CMAppEventHandler{
 			
 		case "ready":
 			m_server.ready(array[2], id);
-			
 			break;
 		}
 	}
