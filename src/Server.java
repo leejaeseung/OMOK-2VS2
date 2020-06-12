@@ -326,17 +326,52 @@ public class Server {
 		return true;
 	}
 
+//	void enterRoom(String rName, String g) throws Exception {
+//		if (tNum.get(rName) < 6) {
+//			int otNum = tNum.get(rName);
+//			tNum.replace(rName, ++otNum);
+//			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
+//			map.get(rName).add(g);
+//			isReady.put(g, 0);
+//			dMap.get(rName).add(g);
+//			dNum.replace(rName, dNum.get(rName) + 1);
+//
+//
+//			//room is not start yet
+//			if (roomState.get(rName) == false) {
+//				// multicast success/enter
+//				StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
+//				sendMsg(buffer.toString(), g);
+//			}
+//			//room is already start
+//			else {
+//				// multicast success/enter
+//				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
+//
+//				//add YW's method
+//				sendMsg(buffer.toString(), g);
+//			}
+//			removeGuest(g);
+//			updateRoomMember(rName);
+//			broadcastRoomlist();
+//		} else {
+//			// send reject/enter
+//			StringBuffer buffer = new StringBuffer("reject/enter");
+//			sendMsg(buffer.toString(), g);
+//		}
+//	}
+
 	void enterRoom(String rName, String g) throws Exception {
 		if (tNum.get(rName) < 6) {
 			int otNum = tNum.get(rName);
 			tNum.replace(rName, ++otNum);
-			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
+			System.out.println(" 쁽 옱 諛   씤 썝 닔 뒗 : " + tNum.get(rName));
 			map.get(rName).add(g);
 			isReady.put(g, 0);
 			dMap.get(rName).add(g);
 			dNum.replace(rName, dNum.get(rName) + 1);
-			
-			
+
+
 			//room is not start yet
 			if (roomState.get(rName) == false) {
 				// multicast success/enter
@@ -347,10 +382,10 @@ public class Server {
 			else {
 				// multicast success/enter
 				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
-				
-				//add YW's method
-				
+
 				sendMsg(buffer.toString(), g);
+				obsStart(rName, g);
+				//add YW's method
 			}
 			removeGuest(g);
 			updateRoomMember(rName);
@@ -582,6 +617,22 @@ public class Server {
 			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
 
 			initGameTime(rName);
+		}
+	}
+
+	void obsStart(String rName, String g) throws Exception {
+		sendMsg("gamestartD", g);
+		sendTeamListD(rName);
+		broadcastLock(rName, "watch");
+
+		//좌표들보내기
+		int loop = mlist.get(rName).size();
+		System.out.println("loop : " + loop);
+		for(int i=0; i<loop; i+=2) {
+			String y = mlist.get(rName).get(i).toString();
+			String x = mlist.get(rName).get(i+1).toString();
+			String msg = "xy/" + y + "/" + x + "/end";
+			sendMsg(msg, g);
 		}
 	}
 
