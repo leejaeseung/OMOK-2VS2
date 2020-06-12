@@ -96,7 +96,26 @@ class Map {
 	public short getGray() {
 		return GRAY;
 	}
+	
+	public int getGrayX() {
+		return this.grayX;
+	}
 
+	public int getGrayY() {
+		return this.grayY;
+	}
+	
+	public void setGrayXYtoNull() {
+		this.grayX = -1;
+		this.grayY = -1;
+	}
+	
+	public void eraseGary() {
+		if(grayX != -1 && grayY != -1)
+		map[grayY][grayX] = 0;
+		setGrayXYtoNull();
+	}
+	
 	public short getXY(int y, int x) {
 		return map[y][x];
 	}
@@ -114,6 +133,9 @@ class Map {
 	}
 
 	public int getMap(int y, int x) {
+		//return 2 = put Gray Stone
+		//return 0 = do nothing
+		//return 1 = put White or Black Stone
 		if(map[y][x] == 0) {
 			return 2;
 		}
@@ -124,6 +146,9 @@ class Map {
 	}
 	
 	public int setMap(int y, int x, boolean isEnd) {
+		//return 2 = put Gray Stone
+		//return 0 = do nothing
+		//return 1 = put White or Black Stone
 		if(map[y][x] == 0 && !isEnd) {
 			if(grayX != -1 && grayY != -1) {
 				map[grayY][grayX] = 0;
@@ -143,19 +168,18 @@ class Map {
 				map[y][x] = BLACK;
 			else
 				map[y][x] = WHITE;
-			grayX = -1;
-			grayY = -1;
+			setGrayXYtoNull();
 			changeCheck();
 		}
 		return 1;
 	}
 
-	public void sendXY(int y, int x, int color) {
-		if(color == 1) {
+	public void sendXY(int y, int x, int flag) {
+		if(flag == 1) {
 			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/double");
 			client.sendUpdateTurnMsg();
 		}
-		else if(color == 2)
+		else if(flag == 2)
 			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/single");
 	}
 }
@@ -229,7 +253,7 @@ class WindowHandler2 extends WindowAdapter {
 		if (tchat.team() == "black") {
 			try {
 				gui.sendStopGame("bgamestop/");
-				gui.waitingroom().setVisible(true);
+				gui.getClient().setVisible(true);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -237,7 +261,7 @@ class WindowHandler2 extends WindowAdapter {
 		} else if (tchat.team() == "white") {
 			try {
 				gui.sendStopGame("wgamestop/");
-				gui.waitingroom().setVisible(true);
+				gui.getClient().setVisible(true);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -245,7 +269,7 @@ class WindowHandler2 extends WindowAdapter {
 		} else {
 			try {
 				gui.sendStopGame("dgamestop/");
-				gui.waitingroom().setVisible(true);
+				gui.getClient().setVisible(true);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -306,6 +330,7 @@ public class GUI extends JFrame {
 	}
 
 	public void setCurTurnUserName(String userName) {
+		map.eraseGary();
 		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
@@ -321,7 +346,7 @@ public class GUI extends JFrame {
 		map.setTurn(turn);
 	}
 
-	public Client waitingroom() {
+	public Client getClient() {
 		return client;
 	}
 
@@ -329,6 +354,7 @@ public class GUI extends JFrame {
 		this.time = curTime;
 		if(this.time == -1) {
 			timeLabel.setText("TIME OUT!!");
+			
 			d.setEnabled(false);
 			this.nextTurn();
 			this.map.changeCheck();
@@ -361,10 +387,10 @@ public class GUI extends JFrame {
 	public void updateMap(int y, int x, boolean isEnd) throws Exception {
 
 		System.out.println("¿ÀÀ×?");
-		int mapColor = map.setMap(y, x, isEnd);
+		int flag = map.setMap(y, x, isEnd);
 
-		System.out.println("MapColor : " + mapColor);
-		if (1 == mapColor) {
+		//System.out.println("MapColor : " + mapColor);
+		if (1 == flag) {
 			c.revalidate();
 			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
@@ -382,7 +408,7 @@ public class GUI extends JFrame {
 			nextTurn();
 //			map.changeCheck();
 		}
-		else if(2 == mapColor) {
+		else if(2 == flag) {
 			c.revalidate();
 			c.repaint();
 		}
@@ -412,18 +438,18 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			int mapColor = map.getMap(y, x);
-			System.out.println("MapColor : " + mapColor);
-			if (0 == mapColor)
+			int flag = map.getMap(y, x);
+			System.out.println("MapColor : " + flag);
+			if (0 == flag)
 				return;
 			/*if(2 == mapColor)
 				map.lock = false;*/
 			gui.getContainer().revalidate();
 			gui.getContainer().repaint();
 
-			map.sendXY(y, x, mapColor);
+			map.sendXY(y, x, flag);
 
-			if (mapColor == 1) {
+			if (flag == 1) {
 				String res = map.cWin.checker(y, x, map.getXY(y, x));
 				System.out.println(map.team + " " + res);
 				if (res != "n") {
