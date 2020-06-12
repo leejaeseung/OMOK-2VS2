@@ -1,5 +1,4 @@
 
-import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Frame;
@@ -23,12 +22,12 @@ public class Room extends Frame implements ActionListener {
 	// 0 d 1 b 2 w
 
 	Room(String name, String rName, Client client) {
-		super(name + "丛狼 规" + "   规力格: " + rName);
+		super(name + "'s Room" + "  Room Name: " + rName);
 		this.rName = rName;
 		this.client = client;
 		id = name;
 		ta = new TextArea();
-		ta.enable(false);
+		//ta.enable(false);
 		ta.setBackground(Color.WHITE);
 		ta.setForeground(Color.black);
 		list = new List();

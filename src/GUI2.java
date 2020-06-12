@@ -46,7 +46,7 @@ public class GUI2 extends JFrame {
 	}
 
 	public void updateMap(int y, int x) throws Exception {
-		if (true == map.setMap(y, x))
+		if (1 == map.setMap(y, x, true))
 			setContentPane(d);
 	}
 
@@ -91,7 +91,7 @@ class mouseEventHandler2 extends MouseAdapter implements MouseMotionListener {
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
 				return;
-			if (false == map.setMap(y, x))
+			if (0 == map.getMap(y, x))
 				return;
 			gui2.setContentPane(d);
 			map.pushStack(y, x);

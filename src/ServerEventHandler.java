@@ -34,14 +34,24 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 		
+<<<<<<< HEAD
 		System.out.println(line + "수신");
+=======
+		System.out.println(line + "����");
+>>>>>>> af42f31577c9d416cdb48ed6ed10655775a445d5
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
+<<<<<<< HEAD
 		// 아예 처음에 입장
 		case "enter":
 			// 서버 list에 guest추가
+=======
+		// first enter
+		case "enter":
+			// add waiting list
+>>>>>>> af42f31577c9d416cdb48ed6ed10655775a445d5
 			m_server.addGuest(id);
 			break;
 
@@ -107,20 +117,36 @@ public class ServerEventHandler implements CMAppEventHandler{
 			break;
 
 		case "xy":
-			System.out.println(1 + ":" + array[3] + " " + array[4] + " " + array[2]);
-			m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4]);
-			m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4]);
-			m_server.broadcastTeam(array[2], "watch", "xy/" + array[3] + "/" + array[4]);
-			m_server.push(array[2], array[3], array[4]);
+			if(array[5].equals("double")) {
+				System.out.println(1 + ":" + array[3] + " " + array[4] + " " + array[2]);
+				m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4] + "/end");
+				m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4] + "/end");
+				m_server.broadcastTeam(array[2], "watch", "xy/" + array[3] + "/" + array[4] + "/end");
+				m_server.push(array[2], array[3], array[4]);
+			}
+			else {
+				if(array[1].equals("black")) {
+					m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4] + "/continue");
+				}
+				else if(array[1].equals("white")) {
+					m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4] + "/continue");
+				}
+			}
 			break;
 
 		case "stack":
 			m_server.sendStack(id, array[2]);
 			break;
 
+		case "updateturn":
+			String msg = array[0] + "/" + array[1];
+			m_server.resetTime(array[2]);
+			m_server.broadcastGameRoom(array[2], msg);
+			break;
+
 		case "logout":
 			m_server.removeGuest(id);
-			m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
+			//m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
 			
 		case "ready":

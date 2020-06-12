@@ -200,18 +200,32 @@ public class Client extends Frame implements ActionListener, MouseListener{
 				if (roomList.getItemCount() == 0)
 					return;
 				String roomname[] = roomList.getSelectedItem().split("/");
-				System.out.println(roomname[0]);
+				//System.out.println(roomname[0]);
 
 				sendMsg("roomjoin/" + id + "/" + roomname[0]);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
 	}
+
+	public void updateTime(String time) {
+		this.gui.updateTime(Integer.parseInt(time));
+		//System.out.println("[" + id + "] �쁽�옱�떆媛� : " + time);
+	}
+
+	public void sendUpdateTurnMsg() {
+		sendMsg("updateturn/" + id + "/" + room.rName + "//");
+	}
+
+	public void updateTurn(String userName) {
+		this.gui.setCurTurnUserName(userName);
+	}
 	
 	public void mouseEntered(MouseEvent e) {
 	}
 
 	public void mouseExited(MouseEvent e) {
+
 	}
 
 	public void mousePressed(MouseEvent e) {

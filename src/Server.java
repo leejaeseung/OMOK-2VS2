@@ -583,6 +583,7 @@ public class Server {
 			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
 
 			initGameTime(rName);
+<<<<<<< HEAD
 		}
 	}
 	
@@ -599,6 +600,8 @@ public class Server {
 			String x = mlist.get(rName).get(i+1).toString();
 			String msg = "xy/" + y + "/" + x + "/end";
 			sendMsg(msg, g);
+=======
+>>>>>>> af42f31577c9d416cdb48ed6ed10655775a445d5
 		}
 	}
 
