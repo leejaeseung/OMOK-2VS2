@@ -329,41 +329,6 @@ public class Server {
 		return true;
 	}
 
-//	void enterRoom(String rName, String g) throws Exception {
-//		if (tNum.get(rName) < 6) {
-//			int otNum = tNum.get(rName);
-//			tNum.replace(rName, ++otNum);
-//			System.out.println("�쁽�옱 諛� �씤�썝�닔�뒗 : " + tNum.get(rName));
-//			map.get(rName).add(g);
-//			isReady.put(g, 0);
-//			dMap.get(rName).add(g);
-//			dNum.replace(rName, dNum.get(rName) + 1);
-//
-//
-//			//room is not start yet
-//			if (roomState.get(rName) == false) {
-//				// multicast success/enter
-//				StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
-//				sendMsg(buffer.toString(), g);
-//			}
-//			//room is already start
-//			else {
-//				// multicast success/enter
-//				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
-//
-//				//add YW's method
-//				sendMsg(buffer.toString(), g);
-//			}
-//			removeGuest(g);
-//			updateRoomMember(rName);
-//			broadcastRoomlist();
-//		} else {
-//			// send reject/enter
-//			StringBuffer buffer = new StringBuffer("reject/enter");
-//			sendMsg(buffer.toString(), g);
-//		}
-//	}
-
 	void enterRoom(String rName, String g) throws Exception {
 		if (tNum.get(rName) < 6) {
 			int otNum = tNum.get(rName);
@@ -482,7 +447,7 @@ public class Server {
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
 
-		// ????? ?? ?????? gameend ???? ???? NullPointerException? ? ??. ??? ??? ?? ???? ??? ?? time thread? ???.
+		// 게임에 참여중인 모든 클라이언트가 gameend 메세지를 보내므로 time thread를 한 번만 삭제할 수 있도록 처리
 		if(timeList.get(rName) != null) {
 			timeList.get(rName).finish();
 			timeList.remove(rName);
@@ -494,8 +459,8 @@ public class Server {
 			enterRoom(rName, g);
 		}*/
 		roomState.replace(rName, false);
-		
 		isReady.replace(g, 0);
+		mlist.replace(rName, new ArrayList<>());
 		StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
 		sendMsg(buffer.toString(), g);
 		updateRoomMember(rName);
