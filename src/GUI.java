@@ -373,12 +373,12 @@ public class GUI extends JFrame {
 	}
 
 	public void showPopUp(String message) throws Exception {
+		client.sendMsg("gameend/" + id + "/" + rName + "/");
 		JOptionPane.showMessageDialog(this, message, "", JOptionPane.INFORMATION_MESSAGE);
 		tchat.setVisible(false);
 		tchat.dispose();
 		setVisible(false);
 		dispose();
-		client.sendMsg("gameend/" + id + "/" + rName + "/");
 		/*client.setRoom(new Room(id, rName, client));
 		client.getRoom().setBounds(200, 200, 400, 300);
 		client.getRoom().setVisible(true);*/
@@ -386,7 +386,6 @@ public class GUI extends JFrame {
 
 	public void updateMap(int y, int x, boolean isEnd) throws Exception {
 
-		System.out.println("¿ÀÀ×?");
 		int flag = map.setMap(y, x, isEnd);
 
 		//System.out.println("MapColor : " + mapColor);
