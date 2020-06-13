@@ -34,31 +34,26 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 
-		System.out.println(line + "수신");
+		System.out.println(line + "�닔�떊");
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-		// 아예 처음에 입장
+		// �븘�삁 泥섏쓬�뿉 �엯�옣
 		case "enter":
-			// 서버 list에 guest추가
+			// �꽌踰� list�뿉 guest異붽�
 			m_server.addGuest(id);
 			break;
 
 		case "bgamestop":
 			m_server.BTeamOut(array[2], id);
 			m_server.addGuest(id);
-			m_server.broadcastTeam(array[2], "white", "stopgame/win");
-			m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
+			m_server.whiteWin(id, array[2], true);
 			break;
 
 		case "dgamestop":
 			m_server.DTeamOut(array[2], id);
 			m_server.addGuest(id);
-			//m_server.broadcastTeam(array[2], "white", "stopgame/win");
-			//m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			//m_server.broadcastTeamAnother(array[2], id, "black", "stopgame/lose");
 			break;
 
 		case "checkroomname":
@@ -68,9 +63,7 @@ public class ServerEventHandler implements CMAppEventHandler{
 		case "wgamestop":
 			m_server.WTeamOut(array[2], id);
 			m_server.addGuest(id);
-			m_server.broadcastTeam(array[2], "black", "stopgame/win");
-			m_server.broadcastTeam(array[2], "watch", "stopgame/end");
-			m_server.broadcastTeamAnother(array[2], id, "white", "stopgame/lose");
+			m_server.blackWin(id, array[2], true);
 			break;
 
 		case "gameend":
@@ -141,6 +134,9 @@ public class ServerEventHandler implements CMAppEventHandler{
 			
 		case "ready":
 			m_server.ready(array[2], id);
+			break;
+		case "surrender":
+			m_server.surrender(array[1], array[2], array[4]);
 			break;
 		}
 	}

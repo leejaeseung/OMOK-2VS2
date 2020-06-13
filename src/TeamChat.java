@@ -57,7 +57,13 @@ public class TeamChat extends Frame implements ActionListener {
 		if (e.getSource() == tf) {
 			try {
 				if (tf.getText().trim().length() > 0) {
-					client.sendMsg("tmsg/" + id + "/" + rName + "/" + tf.getText() + "/" + team);
+					String msg = tf.getText();
+					if(msg.equals("/f")) {
+						client.sendMsg("surrender/" + id + "/" + rName + "//" + team);
+					}
+					else {
+						client.sendMsg("tmsg/" + id + "/" + rName + "/" + msg + "/" + team);
+					}
 					tf.setText("");
 				}
 			} catch (Exception e1) {

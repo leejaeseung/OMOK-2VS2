@@ -28,6 +28,7 @@ public class Server {
 	volatile HashMap<String, Integer> wReadyNum;	//white ready player count
 	volatile HashMap<String, Integer> bReadyNum;	//black ready player count
 	volatile HashMap<String, Integer> isReady;		//people is ready or in game 0 = non-ready, 1 = ready, 2 = in game
+	volatile HashMap<String, Boolean> isSurrender;
 	
 	volatile HashMap<String, Integer> tNum;	
 	
@@ -51,6 +52,7 @@ public class Server {
 		wReadyNum = new HashMap<String, Integer>();
 		bReadyNum = new HashMap<String, Integer>();
 		isReady = new HashMap<String, Integer>();
+		isSurrender = new HashMap<String, Boolean>();
 		
 		list = new ArrayList<String>();
 		mlist = new HashMap<String, ArrayList<Integer>>();
@@ -269,6 +271,7 @@ public class Server {
 		wReadyNum.put(rName, 0);
 		bReadyNum.put(rName, 0);
 		isReady.put(g, 0);
+		isSurrender.put(g, false);
 		
 		dMap.get(rName).add(g);
 		System.out.println("占쏙옙占쏙옙占싫뱄옙 :" + rName);
@@ -369,6 +372,7 @@ public class Server {
 			map.get(rName).add(g);
 			isReady.put(g, 0);
 			dMap.get(rName).add(g);
+			isSurrender.put(g, false);
 			dNum.replace(rName, dNum.get(rName) + 1);
 
 
@@ -569,6 +573,24 @@ public class Server {
 		sendTeamListD(rName);
 		//System.out.println(dMap.get(rName).size());
 	}
+	
+	void blackWin(String id, String rName, boolean out) throws Exception {
+		broadcastTeam(rName, "black", "stopgame/win");
+		broadcastTeam(rName, "watch", "stopgame/end");
+		if(out)
+			broadcastTeamAnother(rName, id, "white", "stopgame/lose");
+		else
+			broadcastTeam(rName, "white", "stopgame/lose");
+	}
+	
+	void whiteWin(String id, String rName, boolean out) throws Exception{
+		broadcastTeam(rName, "white", "stopgame/win");
+		broadcastTeam(rName, "watch", "stopgame/end");
+		if(out)
+			broadcastTeamAnother(rName, id, "black", "stopgame/lose");
+		else
+			broadcastTeam(rName, "black", "stopgame/lose");
+	}
 
 	void sendTeamListB(String rName) throws Exception {
 		StringBuffer buffer = new StringBuffer("teamlist/");
@@ -592,6 +614,48 @@ public class Server {
 			buffer.append(g + "/");
 		for (String g : dMap.get(rName))
 			sendMsg(buffer.toString(), g);
+	}
+	
+	void surrender(String id, String rName, String team) throws Exception {
+		StringBuffer buffer = new StringBuffer("teamlist/");
+		isSurrender.replace(id, !isSurrender.get(id));
+		
+		int surCnt = 0;
+		if(team.equals("black")) {
+			for (String g : bMap.get(rName)) {
+				if(isSurrender.get(g)) {
+					buffer.append(g + "(surrender)/");
+					surCnt++;
+				}
+				else
+					buffer.append(g + "/");
+			}
+			
+			if(surCnt == 2) {
+				whiteWin(id, rName, false);
+			}
+			else {
+			for (String g : bMap.get(rName))
+				sendMsg(buffer.toString(), g);
+			}
+		}
+		else if(team.equals("white")) {
+			for (String g : wMap.get(rName)){
+				if(isSurrender.get(g)) {
+					buffer.append(g + "(surrender)/");
+					surCnt++;
+				}
+				else
+					buffer.append(g + "/");
+			}
+			if(surCnt == 2) {
+				blackWin(id, rName, false);
+			}
+			else {
+			for (String g : wMap.get(rName))
+				sendMsg(buffer.toString(), g);
+			}
+		}
 	}
 
 	void gameStart(String rName) throws Exception {
