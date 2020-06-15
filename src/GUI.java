@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Stack;
 
 import javax.swing.*;
@@ -97,14 +99,6 @@ class Map {
 		return GRAY;
 	}
 	
-	public int getGrayX() {
-		return this.grayX;
-	}
-
-	public int getGrayY() {
-		return this.grayY;
-	}
-	
 	public void setGrayXYtoNull() {
 		this.grayX = -1;
 		this.grayY = -1;
@@ -118,10 +112,6 @@ class Map {
 	
 	public short getXY(int y, int x) {
 		return map[y][x];
-	}
-
-	public boolean getCheck() {
-		return checkBNW;
 	}
 
 	public void changeCheck() {
@@ -149,6 +139,12 @@ class Map {
 		//return 2 = put Gray Stone
 		//return 0 = do nothing
 		//return 1 = put White or Black Stone
+
+		if(y == 100 && x == 100) {
+			changeCheck();
+			return 0;
+		}
+
 		if(map[y][x] == 0 && !isEnd) {
 			if(grayX != -1 && grayY != -1) {
 				map[grayY][grayX] = 0;
@@ -160,9 +156,7 @@ class Map {
 		}
 		if (map[y][x] == BLACK || map[y][x] == WHITE)
 			return 0;
-		
-		System.out.println("Map Color : " + map[y][x]);
-		
+
 		if(map[y][x] == GRAY || isEnd) {
 			if (checkBNW)
 				map[y][x] = BLACK;
@@ -176,15 +170,15 @@ class Map {
 
 	public void sendXY(int y, int x, int flag) {
 		if(flag == 1) {
-			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/double");
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/double/");
 			client.sendUpdateTurnMsg();
 		}
 		else if(flag == 2)
-			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/single");
+			client.sendMsg("xy/" + team + "/" + rName + "/" + y + "/" + x + "/single/");
 	}
 }
 
-class DrawBoard extends JPanel {
+class DrawBoard extends JPanel implements Serializable {
 	private MapSize size;
 	private Map map;
 	private final int STONE_SIZE = 28;
@@ -292,7 +286,6 @@ public class GUI extends JFrame {
 	MapSize size = new MapSize();
 	DrawBoard d;
 
-
 	public GUI(String id, Client client, String rName, String team, TeamChat tchat) {
 		super(id + "(" + team + ")");
 		this.rName = rName;
@@ -385,9 +378,9 @@ public class GUI extends JFrame {
 
 		int flag = map.setMap(y, x, isEnd);
 
+		c.revalidate();
+		c.repaint();
 		if (1 == flag) {
-			c.revalidate();
-			c.repaint();
 			String res = map.cWin.checker(y, x, map.getXY(y, x));
 			System.out.println(map.team + " " + res);
 			if (res != "n") {
@@ -401,10 +394,6 @@ public class GUI extends JFrame {
 				}
 			}
 			nextTurn();
-		}
-		else if(2 == flag) {
-			c.revalidate();
-			c.repaint();
 		}
 	}
 }
@@ -430,7 +419,6 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			if (x >= 20 || y >= 20)
 				return;
 			int flag = map.getMap(y, x);
-			System.out.println("MapColor : " + flag);
 			if (0 == flag)
 				return;
 			

@@ -1,3 +1,6 @@
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,6 +38,7 @@ public class Server {
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	private HashMap<String, Time> timeList;
+
 
 	Server() {
 		roomNameList = new ArrayList<String>();
@@ -504,13 +508,14 @@ public class Server {
 		Time time = new Time(rName);
 		time.setTimeFlowListener(() -> {
 			this.sendGameTime(rName, time.getSec());
-			System.out.println("[SERVER] Timer: " + time.getSec());
 		});
 		timeList.put(rName, time);
 	}
 
-	void sendGameTime(String rName, int curSec){
+	void sendGameTime(String rName, int curSec) {
 		broadcastRoom(rName, "timeflow/" + curSec);
+		if(curSec == -1)
+			push(rName, "100", "100");
 	}
 
 	void broadcastRoom(String rName, String msg) {
