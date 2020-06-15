@@ -28,29 +28,9 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	private TeamChat tchat;
 	private GUI gui;
 	private GUI2 gui2;
-	
-	public CMClientStub getM_ClientStub() {
-		return m_ClientStub;
-	}
-
-	public void setM_ClientStub(CMClientStub m_ClientStub) {
-		this.m_ClientStub = m_ClientStub;
-	}
-
-	public ClientEventHandler getM_CEventHandler() {
-		return m_CEventHandler;
-	}
-
-	public void setM_CEventHandler(ClientEventHandler m_CEventHandler) {
-		this.m_CEventHandler = m_CEventHandler;
-	}
 
 	public List getRoomList() {
 		return roomList;
-	}
-
-	public void setRoomList(List roomList) {
-		this.roomList = roomList;
 	}
 
 	public List getRoomNumList() {
@@ -59,26 +39,6 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	
 	public List getUserList() {
 		return userList;
-	}
-
-	public void setUserList(List userList) {
-		this.userList = userList;
-	}
-
-	public TextField getTf() {
-		return tf;
-	}
-
-	public void setTf(TextField tf) {
-		this.tf = tf;
-	}
-
-	public Button getCreateButton() {
-		return createButton;
-	}
-
-	public void setCreateButton(Button createButton) {
-		this.createButton = createButton;
 	}
 
 	public String getId() {
@@ -120,7 +80,7 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	public void setGui2(GUI2 gui2) {
 		this.gui2 = gui2;
 	}
-	
+
 	public Client(String id)
 	{
 		super(id + "Welcome~~");
@@ -175,11 +135,11 @@ public class Client extends Frame implements ActionListener, MouseListener{
 		room.setVisible(true);
 		sendMsg("mkroom/" + id + "/" + rName);
 	}
-	
+
 	public void setGUI2(GUI2 gui2) {
 		this.gui2 = gui2;
 	}
-	
+
 	public void sendMsg(String Msg) {
 		CMDummyEvent due = new CMDummyEvent();
 		due.setDummyInfo(Msg);

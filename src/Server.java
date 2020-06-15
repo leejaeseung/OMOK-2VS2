@@ -62,136 +62,6 @@ public class Server {
 		m_eventHandler = new ServerEventHandler(m_serverStub, this);
 	}
 
-	public CMServerStub getM_serverStub() {
-		return m_serverStub;
-	}
-
-	public void setM_serverStub(CMServerStub m_serverStub) {
-		this.m_serverStub = m_serverStub;
-	}
-
-	public ServerEventHandler getM_eventHandler() {
-		return m_eventHandler;
-	}
-
-
-
-	public void setM_eventHandler(ServerEventHandler m_eventHandler) {
-		this.m_eventHandler = m_eventHandler;
-	}
-
-
-
-	public ArrayList<String> getRoomNameList() {
-		return roomNameList;
-	}
-
-
-
-	public void setRoomNameList(ArrayList<String> roomNameList) {
-		this.roomNameList = roomNameList;
-	}
-
-
-
-	public ArrayList<String> getList() {
-		return list;
-	}
-
-
-
-	public void setList(ArrayList<String> list) {
-		this.list = list;
-	}
-
-
-
-	public HashMap<String, ArrayList<String>> getMap() {
-		return map;
-	}
-
-
-
-	public void setMap(HashMap<String, ArrayList<String>> map) {
-		this.map = map;
-	}
-
-
-
-	public HashMap<String, ArrayList<String>> getwMap() {
-		return wMap;
-	}
-
-
-
-	public void setwMap(HashMap<String, ArrayList<String>> wMap) {
-		this.wMap = wMap;
-	}
-
-
-
-	public HashMap<String, ArrayList<String>> getbMap() {
-		return bMap;
-	}
-
-
-
-	public void setbMap(HashMap<String, ArrayList<String>> bMap) {
-		this.bMap = bMap;
-	}
-
-
-
-	public HashMap<String, ArrayList<String>> getdMap() {
-		return dMap;
-	}
-
-
-
-	public void setdMap(HashMap<String, ArrayList<String>> dMap) {
-		this.dMap = dMap;
-	}
-
-
-
-	public HashMap<String, Integer> getwNum() {
-		return wNum;
-	}
-
-
-
-	public void setwNum(HashMap<String, Integer> wNum) {
-		this.wNum = wNum;
-	}
-
-
-
-	public HashMap<String, Integer> getbNum() {
-		return bNum;
-	}
-
-
-
-	public void setbNum(HashMap<String, Integer> bNum) {
-		this.bNum = bNum;
-	}
-	
-	public HashMap<String, Integer> getdNum() {
-		return dNum;
-	}
-
-	public void setdNum(HashMap<String, Integer> dNum) {
-		this.dNum = dNum;
-	}
-
-	public HashMap<String, ArrayList<Integer>> getMlist() {
-		return mlist;
-	}
-
-	public void setMlist(HashMap<String, ArrayList<Integer>> mlist) {
-		this.mlist = mlist;
-	}
-
 	public void resetTime(String rName) {
 		timeList.get(rName).resetTime();
 	}
@@ -214,16 +84,6 @@ public class Server {
 		broadcastList();
 	}
 
-	
-	void getList(String g) throws Exception {
-		StringBuffer buffer = new StringBuffer("list/");
-		for (String g2 : list)
-			buffer.append(g2 + "/");
-		
-		sendMsg(buffer.toString(), g);
-	}
-
-	
 	void broadcastList() throws Exception {
 		StringBuffer buffer = new StringBuffer("list/");
 		for (String g : list)
@@ -232,7 +92,6 @@ public class Server {
 		broadcast(buffer.toString());
 	}
 
-	
 	void getRoomlist(String g) throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -243,7 +102,6 @@ public class Server {
 		sendMsg(buffer.toString(), g);
 	}
 
-	
 	void broadcastRoomlist() throws Exception {
 		//Set<String> roomlist = map.keySet();
 		StringBuffer buffer = new StringBuffer("roomlist/");
@@ -452,12 +310,6 @@ public class Server {
 			timeList.get(rName).finish();
 			timeList.remove(rName);
 		}
-		/*if (checkWaitingRoomName(rName)) {
-			removeBWDRoom(rName);
-			addRoom(rName, g);
-		} else {
-			enterRoom(rName, g);
-		}*/
 		roomState.replace(rName, false);
 		isReady.replace(g, 0);
 		mlist.replace(rName, new ArrayList<>());
@@ -536,7 +388,6 @@ public class Server {
 		dNum.replace(rName, dNum.get(rName) - 1);
 		tNum.replace(rName, tNum.get(rName) - 1);
 		sendTeamListD(rName);
-		//System.out.println(dMap.get(rName).size());
 	}
 	
 	void blackWin(String id, String rName, boolean out) throws Exception {

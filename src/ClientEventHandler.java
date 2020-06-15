@@ -30,6 +30,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			return;
 		}
 	}
+
 	private void processDummyEvent(CMEvent cme) throws Exception {
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
@@ -72,10 +73,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 				m_client.getRoom().list.add(array[i]);
 			}
 			break;
-
-		/*case "roomout":
-			//m_client.getRoom().list.remove(array[1]);
-			break;*/
 
 		case "msg":
 			m_client.getRoom().ta.append("[" + array[1] + "]" + array[2] + "\n");
@@ -123,10 +120,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 
 		case "lock":
 			m_client.getGui().setTurn(Integer.parseInt(array[1]));
-			break;
-
-		case "updatestack":
-				m_client.getGui2().updateStack(Integer.parseInt(array[1]), array[2]);
 			break;
 
 		case "stopgame":

@@ -379,9 +379,6 @@ public class GUI extends JFrame {
 		tchat.dispose();
 		setVisible(false);
 		dispose();
-		/*client.setRoom(new Room(id, rName, client));
-		client.getRoom().setBounds(200, 200, 400, 300);
-		client.getRoom().setVisible(true);*/
 	}
 
 	public void updateMap(int y, int x, boolean isEnd) throws Exception {
