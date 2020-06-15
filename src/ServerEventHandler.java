@@ -98,7 +98,6 @@ public class ServerEventHandler implements CMAppEventHandler{
 
 		case "xy":
 			if(array[5].equals("double")) {
-				System.out.println(1 + ":" + array[3] + " " + array[4] + " " + array[2]);
 				m_server.broadcastTeam(array[2], "black", "xy/" + array[3] + "/" + array[4] + "/end");
 				m_server.broadcastTeam(array[2], "white", "xy/" + array[3] + "/" + array[4] + "/end");
 				m_server.broadcastTeam(array[2], "watch", "xy/" + array[3] + "/" + array[4] + "/end");
