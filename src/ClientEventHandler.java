@@ -18,9 +18,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 	@Override
 	public void processEvent(CMEvent cme) {
 		// TODO Auto-generated method stub
-		
-		
-		
 		switch(cme.getType()) {
 		case CMInfo.CM_DUMMY_EVENT:
 			try {
@@ -42,6 +39,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 			return;
 		}
 	}
+
 	private void processSessionEvent(CMEvent cme) throws Exception{
 		CMSessionEvent se = (CMSessionEvent)cme;
 		
@@ -102,10 +100,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 			}
 			break;
 
-		/*case "roomout":
-			//m_client.getRoom().list.remove(array[1]);
-			break;*/
-
 		case "msg":
 			m_client.getRoom().ta.append("[" + array[1] + "]" + array[2] + "\n");
 			break;
@@ -152,10 +146,6 @@ public class ClientEventHandler implements CMAppEventHandler {
 
 		case "lock":
 			m_client.getGui().setTurn(Integer.parseInt(array[1]));
-			break;
-
-		case "updatestack":
-				m_client.getGui2().updateStack(Integer.parseInt(array[1]), array[2]);
 			break;
 
 		case "stopgame":
