@@ -1,3 +1,6 @@
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,6 +38,7 @@ public class Server {
 	volatile HashMap<String, ArrayList<Integer>> mlist;
 
 	private HashMap<String, Time> timeList;
+
 
 	Server() {
 		roomNameList = new ArrayList<String>();
@@ -191,13 +195,11 @@ public class Server {
 		if (tNum.get(rName) < 6) {
 			int otNum = tNum.get(rName);
 			tNum.replace(rName, ++otNum);
-			System.out.println(" 쁽 옱 諛   씤 썝 닔 뒗 : " + tNum.get(rName));
 			map.get(rName).add(g);
 			isReady.put(g, 0);
 			dMap.get(rName).add(g);
 			isSurrender.put(g, false);
 			dNum.replace(rName, dNum.get(rName) + 1);
-
 
 			//room is not start yet
 			if (roomState.get(rName) == false) {
@@ -520,13 +522,14 @@ public class Server {
 		Time time = new Time(rName);
 		time.setTimeFlowListener(() -> {
 			this.sendGameTime(rName, time.getSec());
-			System.out.println("[SERVER] Timer: " + time.getSec());
 		});
 		timeList.put(rName, time);
 	}
 
 	void sendGameTime(String rName, int curSec) {
 		broadcastGameRoom(rName, "timeflow/" + curSec);
+		if(curSec == -1)
+			push(rName, "100", "100");
 	}
 
 	void broadcastRoom(String rName, String msg) throws Exception {

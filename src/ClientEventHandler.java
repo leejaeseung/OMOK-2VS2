@@ -137,10 +137,10 @@ public class ClientEventHandler implements CMAppEventHandler {
 
 		case "xy":
 			if(array[3].equals("end")) {
-				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]), true);	
+				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]), true);
 			}
 			else if(array[3].equals("continue")) {
-				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]), false);	
+				m_client.getGui().updateMap(Integer.parseInt(array[1]), Integer.parseInt(array[2]),false);
 			}
 			break;
 
@@ -162,17 +162,19 @@ public class ClientEventHandler implements CMAppEventHandler {
 
 		case "updateturn":
 			m_client.updateTurn(array[1]);
+			break;
 
 		case "success":
 			switch(array[1]) {
 			case "enter":
 				m_client.joinRoom(array[3]);
+				break;
 			}
 			
 		case "reject":
 			switch(array[1]) {
 			case "enter":
-				
+				break;
 			}
 		}
 	}

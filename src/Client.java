@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.*;
 import java.util.Random;
 
 import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
@@ -174,7 +175,6 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	}
 
 	public void mouseExited(MouseEvent e) {
-
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -207,9 +207,10 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	}
 	
 	public void login(Client client) {
-		String randomID = "user" + rc.nextInt(9999);
+		String randomID = "user" + rc.nextInt(10);
 		client.getCStub().loginCM(randomID, "");
 		client.setId(randomID);
+		client.setTitle(client.getId());
 	}
 	
 	public static void main(String[] args)
