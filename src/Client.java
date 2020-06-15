@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.util.Random;
 
 import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 
 public class Client extends Frame implements ActionListener, MouseListener{
@@ -121,11 +122,8 @@ public class Client extends Frame implements ActionListener, MouseListener{
 		this.gui2 = gui2;
 	}
 	
-	public Client(String id)
+	public Client()
 	{
-		super(id + "Welcome~~");
-		this.id = id;
-		
 		m_ClientStub = new CMClientStub();
 		m_CEventHandler = new ClientEventHandler(m_ClientStub, this);
 				
@@ -257,16 +255,21 @@ public class Client extends Frame implements ActionListener, MouseListener{
 		return m_CEventHandler;
 	}
 	
-	public static void main(String[] args)
-	{
+	public void login(Client client) {
 		Random rc = new Random();
 		
-		Client client = new Client("user" + rc.nextInt(9999));
+		String randomID = "user" + rc.nextInt(9999);
+		client.getCStub().loginCM(randomID, "");
+		client.setId(randomID);
+	}
+	
+	public static void main(String[] args)
+	{
+		
+		Client client = new Client();
 		client.getCStub().setAppEventHandler(client.getClientEventHandler());
 		client.getCStub().startCM();
-		client.getCStub().loginCM(client.id, "");
-		client.setBounds(200, 200, 400, 300);
-		client.setVisible(true);
-		client.sendMsg("enter/" + client.id);
+		client.login(client);
+		
 	}
 }
