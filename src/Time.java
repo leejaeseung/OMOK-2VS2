@@ -2,10 +2,7 @@
 public class Time implements Runnable {
 
     interface OnTimeFlowListener {
-        public void onTimeFlow();
-    }
-    interface OnTimeZeroListener {
-        public void onTimeZero();
+        void onTimeFlow();
     }
 
     OnTimeFlowListener onTimeFlowListener = null;

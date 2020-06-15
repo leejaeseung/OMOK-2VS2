@@ -1,5 +1,6 @@
 import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
 import kr.ac.konkuk.ccslab.cm.event.handler.CMAppEventHandler;
 import kr.ac.konkuk.ccslab.cm.info.CMInfo;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
@@ -26,11 +27,36 @@ public class ClientEventHandler implements CMAppEventHandler {
 				e.printStackTrace();
 			}
 			break;
+		case CMInfo.CM_SESSION_EVENT:
+			try {
+				
+				processSessionEvent(cme);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		default:
 			return;
 		}
 	}
 
+	private void processSessionEvent(CMEvent cme) throws Exception{
+		CMSessionEvent se = (CMSessionEvent)cme;
+		
+		switch(se.getID()) {
+		case CMSessionEvent.LOGIN_ACK:
+			if(se.isValidUser() != 1) {
+				m_client.login(m_client);
+			}
+			else {
+				m_client.setBounds(200, 200, 400, 300);
+				m_client.setVisible(true);
+				m_client.sendMsg("enter/" + m_client.getId());
+			}
+		break;
+		}
+	}
+	
 	private void processDummyEvent(CMEvent cme) throws Exception {
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
