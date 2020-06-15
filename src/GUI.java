@@ -99,20 +99,12 @@ class Map {
 		return GRAY;
 	}
 	
-	public int getGrayX() {
-		return this.grayX;
-	}
-
-	public int getGrayY() {
-		return this.grayY;
-	}
-	
 	public void setGrayXYtoNull() {
 		this.grayX = -1;
 		this.grayY = -1;
 	}
 	
-	public void eraseGary() {
+	public void eraseGray() {
 		if(grayX != -1 && grayY != -1)
 		map[grayY][grayX] = 0;
 		setGrayXYtoNull();
@@ -122,16 +114,8 @@ class Map {
 		return map[y][x];
 	}
 
-	public boolean getCheck() {
-		return checkBNW;
-	}
-
 	public void changeCheck() {
 		checkBNW = !checkBNW;
-	}
-
-	public void setCheck(boolean checkBNW) {
-		this.checkBNW = checkBNW;
 	}
 
 	public void setNull(int y, int x) {
@@ -338,24 +322,8 @@ public class GUI extends JFrame {
 		this.addWindowListener(new WindowHandler2(this, tchat));
 	}
 
-	public void setDrawBoard(DrawBoard d) {
-		this.d = d;
-	}
-
-	public DrawBoard getDrawBoard() {
-		return d;
-	}
-
-	public boolean getCheckBNW() {
-		return map.getCheck();
-	}
-
-	public void setCheckBNW(boolean checkBNW) {
-		map.setCheck(checkBNW);
-	}
-
 	public void setCurTurnUserName(String userName) {
-		map.eraseGary();
+		map.eraseGray();
 		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
@@ -426,7 +394,6 @@ public class GUI extends JFrame {
 				}
 			}
 			nextTurn();
-//			map.changeCheck();
 		}
 	}
 }
@@ -447,9 +414,6 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 
 	public void mouseClicked(MouseEvent e) {
 		if (map.turncount == map.turn) {
-			/*map.lock = false;
-			while (!map.lock) {*/
-			//map.lock = true;
 			int x = (int) Math.round((double) ((e.getX() - 26) / 30));
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
@@ -457,11 +421,9 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			int flag = map.getMap(y, x);
 			if (0 == flag)
 				return;
-			/*if(2 == mapColor)
-				map.lock = false;*/
-
-//			gui.getContainer().revalidate();
-//			gui.getContainer().repaint();
+			
+			gui.getContainer().revalidate();
+			gui.getContainer().repaint();
 
 			map.sendXY(y, x, flag);
 

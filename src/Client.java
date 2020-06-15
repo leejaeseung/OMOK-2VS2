@@ -150,7 +150,6 @@ public class Client extends Frame implements ActionListener, MouseListener{
 				if (roomList.getItemCount() == 0)
 					return;
 				String roomname[] = roomList.getSelectedItem().split("/");
-				//System.out.println(roomname[0]);
 
 				sendMsg("roomjoin/" + id + "/" + roomname[0]);
 			} catch (Exception e1) {
@@ -160,7 +159,6 @@ public class Client extends Frame implements ActionListener, MouseListener{
 
 	public void updateTime(String time) {
 		this.gui.updateTime(Integer.parseInt(time));
-		//System.out.println("[" + id + "] �쁽�옱�떆媛� : " + time);
 	}
 
 	public void sendUpdateTurnMsg() {
@@ -207,7 +205,7 @@ public class Client extends Frame implements ActionListener, MouseListener{
 	}
 	
 	public void login(Client client) {
-		String randomID = "user" + rc.nextInt(10);
+		String randomID = "user" + rc.nextInt(9999);
 		client.getCStub().loginCM(randomID, "");
 		client.setId(randomID);
 		client.setTitle(client.getId());

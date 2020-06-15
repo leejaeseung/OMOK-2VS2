@@ -18,13 +18,10 @@ public class TeamChat2 extends TeamChat {
 		flag = false;
 	}
 
-	// 오목판 가져오기 관전하는사람들이
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == b) {
-			System.out.println("asd1");
 			if (flag == false) {
 				flag = true;
-				System.out.println("asd2");
 				GUI2 gui2 = new GUI2(id, this);
 				client.setGUI2(gui2);
 				try {
@@ -52,6 +49,5 @@ public class TeamChat2 extends TeamChat {
 
 	public void changeFlag() {
 		flag = !flag;
-		System.out.println(flag);
 	}
 }

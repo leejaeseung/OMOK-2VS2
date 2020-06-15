@@ -136,7 +136,6 @@ public class Server {
 		isSurrender.put(g, false);
 		
 		dMap.get(rName).add(g);
-		System.out.println("占쏙옙占쏙옙占싫뱄옙 :" + rName);
 		broadcastRoomlist();
 		updateRoomMember(rName);
 	}
@@ -200,29 +199,17 @@ public class Server {
 			dMap.get(rName).add(g);
 			isSurrender.put(g, false);
 			dNum.replace(rName, dNum.get(rName) + 1);
+			
+			StringBuffer buffer = new StringBuffer("join/" + rName);
+			sendMsg(buffer.toString(), g);
 
-			//room is not start yet
-			if (roomState.get(rName) == false) {
-				// multicast success/enter
-				StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
-				sendMsg(buffer.toString(), g);
-			}
 			//room is already start
-			else {
-				// multicast success/enter
-				StringBuffer buffer = new StringBuffer("success/enter/running/" + rName);
-
-				sendMsg(buffer.toString(), g);
+			if (roomState.get(rName)) {
 				obsStart(rName, g);
-				//add YW's method
 			}
 			removeGuest(g);
 			updateRoomMember(rName);
 			broadcastRoomlist();
-		} else {
-			// send reject/enter
-			StringBuffer buffer = new StringBuffer("reject/enter");
-			sendMsg(buffer.toString(), g);
 		}
 	}
 	
@@ -307,7 +294,6 @@ public class Server {
 
 	synchronized void gameEnd(String rName, String g) throws Exception {
 
-		// 게임에 참여중인 모든 클라이언트가 gameend 메세지를 보내므로 time thread를 한 번만 삭제할 수 있도록 처리
 		if(timeList.get(rName) != null) {
 			timeList.get(rName).finish();
 			timeList.remove(rName);
@@ -315,7 +301,7 @@ public class Server {
 		roomState.replace(rName, false);
 		isReady.replace(g, 0);
 		mlist.replace(rName, new ArrayList<>());
-		StringBuffer buffer = new StringBuffer("success/enter/waiting/" + rName);
+		StringBuffer buffer = new StringBuffer("join/" + rName);
 		sendMsg(buffer.toString(), g);
 		updateRoomMember(rName);
 		broadcastRoomlist();
@@ -496,7 +482,7 @@ public class Server {
 			broadcastLock(rName, "black");
 			broadcastLock(rName, "watch");
 
-			broadcastGameRoom(rName, "updateturn/" + bMap.get(rName).get(0));
+			broadcastRoom(rName, "updateturn/" + bMap.get(rName).get(0));
 
 			initGameTime(rName);
 		}
@@ -507,7 +493,7 @@ public class Server {
 		sendTeamListD(rName);
 		broadcastLock(rName, "watch");
 
-		//좌표들보내기
+		//send x, y
 		int loop = mlist.get(rName).size();
 		System.out.println("loop : " + loop);
 		for(int i=0; i<loop; i+=2) {
@@ -518,7 +504,7 @@ public class Server {
 		}
 	}
 
-	void initGameTime(String rName) {
+	void initGameTime(String rName){
 		Time time = new Time(rName);
 		time.setTimeFlowListener(() -> {
 			this.sendGameTime(rName, time.getSec());
@@ -527,12 +513,12 @@ public class Server {
 	}
 
 	void sendGameTime(String rName, int curSec) {
-		broadcastGameRoom(rName, "timeflow/" + curSec);
+		broadcastRoom(rName, "timeflow/" + curSec);
 		if(curSec == -1)
 			push(rName, "100", "100");
 	}
 
-	void broadcastRoom(String rName, String msg) throws Exception {
+	void broadcastRoom(String rName, String msg) {
 		for (String g : map.get(rName))
 			sendMsg(msg, g);
 	}
@@ -579,7 +565,7 @@ public class Server {
 				sendMsg("lock/" + -100, g);
 	}
 
-	void broadcast(String msg) throws Exception {
+	void broadcast(String msg) {
 		for (String g : list)
 			sendMsg(msg, g);
 	}
@@ -608,14 +594,6 @@ public class Server {
 		m_serverStub.send(cmde, id);
 	}
 
-	public void broadcastGameRoom(String rName, String msg) {
-		for (String g : bMap.get(rName))
-			sendMsg(msg, g);
-		for (String g : wMap.get(rName))
-			sendMsg(msg, g);
-		for (String g : dMap.get(rName))
-			sendMsg(msg, g);
-	}
 
 	public static void main(String args[]) throws Exception {
 		Server server = new Server();
