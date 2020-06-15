@@ -110,7 +110,7 @@ class Map {
 		this.grayY = -1;
 	}
 	
-	public void eraseGary() {
+	public void eraseGray() {
 		if(grayX != -1 && grayY != -1)
 		map[grayY][grayX] = 0;
 		setGrayXYtoNull();
@@ -330,7 +330,7 @@ public class GUI extends JFrame {
 	}
 
 	public void setCurTurnUserName(String userName) {
-		map.eraseGary();
+		map.eraseGray();
 		this.whoseTurn.setText("NOW turn -> " + userName);
 	}
 
@@ -379,16 +379,12 @@ public class GUI extends JFrame {
 		tchat.dispose();
 		setVisible(false);
 		dispose();
-		/*client.setRoom(new Room(id, rName, client));
-		client.getRoom().setBounds(200, 200, 400, 300);
-		client.getRoom().setVisible(true);*/
 	}
 
 	public void updateMap(int y, int x, boolean isEnd) throws Exception {
 
 		int flag = map.setMap(y, x, isEnd);
 
-		//System.out.println("MapColor : " + mapColor);
 		if (1 == flag) {
 			c.revalidate();
 			c.repaint();
@@ -405,7 +401,6 @@ public class GUI extends JFrame {
 				}
 			}
 			nextTurn();
-//			map.changeCheck();
 		}
 		else if(2 == flag) {
 			c.revalidate();
@@ -430,9 +425,6 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 
 	public void mouseClicked(MouseEvent e) {
 		if (map.turncount == map.turn) {
-			/*map.lock = false;
-			while (!map.lock) {*/
-			//map.lock = true;
 			int x = (int) Math.round((double) ((e.getX() - 26) / 30));
 			int y = (int) Math.round((double) ((e.getY() - 56) / 30));
 			if (x >= 20 || y >= 20)
@@ -441,8 +433,7 @@ class mouseEventHandler extends MouseAdapter implements MouseMotionListener {
 			System.out.println("MapColor : " + flag);
 			if (0 == flag)
 				return;
-			/*if(2 == mapColor)
-				map.lock = false;*/
+			
 			gui.getContainer().revalidate();
 			gui.getContainer().repaint();
 

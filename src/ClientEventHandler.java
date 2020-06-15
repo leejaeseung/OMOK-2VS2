@@ -51,6 +51,7 @@ public class ClientEventHandler implements CMAppEventHandler {
 				m_client.login(m_client);
 			}
 			else {
+				m_client.setTitle(m_client.getId());
 				m_client.setBounds(200, 200, 400, 300);
 				m_client.setVisible(true);
 				m_client.sendMsg("enter/" + m_client.getId());
@@ -95,16 +96,10 @@ public class ClientEventHandler implements CMAppEventHandler {
 		case "roommember":
 			m_client.getRoom().list.removeAll();
 			len = array.length;
-			//System.out.println(m_client.getId() + " size!!:" + len);
 			for (int i = 1; i < len; i++) {
-				//System.out.println(array[i]);
 				m_client.getRoom().list.add(array[i]);
 			}
 			break;
-
-		/*case "roomout":
-			//m_client.getRoom().list.remove(array[1]);
-			break;*/
 
 		case "msg":
 			m_client.getRoom().ta.append("[" + array[1] + "]" + array[2] + "\n");
@@ -172,18 +167,11 @@ public class ClientEventHandler implements CMAppEventHandler {
 
 		case "updateturn":
 			m_client.updateTurn(array[1]);
+			break;
 
-		case "success":
-			switch(array[1]) {
-			case "enter":
-				m_client.joinRoom(array[3]);
-			}
-			
-		case "reject":
-			switch(array[1]) {
-			case "enter":
-				
-			}
+		case "join":
+			m_client.joinRoom(array[1]);
+			break;
 		}
 	}
 

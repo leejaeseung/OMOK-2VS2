@@ -34,14 +34,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		String line = due.getDummyInfo();
 
-		System.out.println(line + "�닔�떊");
 		String array[] = line.split("/");
 		String id = array[1];
 		//tag/id/roomname/msg/team
 		switch (array[0]) {
-		// �븘�삁 泥섏쓬�뿉 �엯�옣
 		case "enter":
-			// �꽌踰� list�뿉 guest異붽�
 			m_server.addGuest(id);
 			break;
 
@@ -124,12 +121,11 @@ public class ServerEventHandler implements CMAppEventHandler{
 		case "updateturn":
 			String msg = array[0] + "/" + array[1];
 			m_server.resetTime(array[2]);
-			m_server.broadcastGameRoom(array[2], msg);
+			m_server.broadcastRoom(array[2], msg);
 			break;
 
 		case "logout":
 			m_server.removeGuest(id);
-			//m_server.broadcastTeam(array[2], array[4], "tmsg/" + id + "/" + array[3]);
 			return;
 			
 		case "ready":

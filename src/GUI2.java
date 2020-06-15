@@ -17,7 +17,6 @@ class WindowHandler extends WindowAdapter {
 	}
 
 	public void windowClosing(WindowEvent e) {
-		System.out.println("gui2 wclose");
 		gui2.changeFlag();
 	}
 }
@@ -75,9 +74,7 @@ class mouseEventHandler2 extends MouseAdapter implements MouseMotionListener {
 
 	public void mouseClicked(MouseEvent e) {
 		if (SwingUtilities.isRightMouseButton(e)) {
-			System.out.println("right 1");
 			if (!map.SisEmpty()) {
-				System.out.println("right 2");
 				int y;
 				int x;
 				x = map.Spop();

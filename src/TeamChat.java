@@ -29,7 +29,6 @@ public class TeamChat extends Frame implements ActionListener {
 		this.team = team;
 		id = name;
 		ta = new TextArea();
-		//ta.enable(false);
 		ta.setBackground(Color.WHITE);
 		ta.setForeground(Color.black);
 		list = new List();
