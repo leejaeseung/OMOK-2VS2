@@ -5,8 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Stack;
 
 import javax.swing.*;
@@ -105,9 +103,10 @@ class Map {
 	}
 	
 	public void eraseGray() {
-		if(grayX != -1 && grayY != -1)
-		map[grayY][grayX] = 0;
-		setGrayXYtoNull();
+		if(grayX != -1 && grayY != -1) {
+			map[grayY][grayX] = 0;
+			setGrayXYtoNull();
+		}
 	}
 	
 	public short getXY(int y, int x) {
@@ -178,7 +177,7 @@ class Map {
 	}
 }
 
-class DrawBoard extends JPanel implements Serializable {
+class DrawBoard extends JPanel {
 	private MapSize size;
 	private Map map;
 	private final int STONE_SIZE = 28;
@@ -347,7 +346,6 @@ public class GUI extends JFrame {
 		this.time = curTime;
 		if(this.time == -1) {
 			timeLabel.setText("TIME OUT!!");
-			
 			d.setEnabled(false);
 			this.nextTurn();
 			this.map.changeCheck();
