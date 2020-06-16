@@ -299,6 +299,9 @@ public class Server {
 		mlist.replace(rName, new ArrayList<>());
 		StringBuffer buffer = new StringBuffer("join/" + rName);
 		sendMsg(buffer.toString(), g);
+		
+		
+		
 		updateRoomMember(rName);
 		broadcastRoomlist();
 	}
